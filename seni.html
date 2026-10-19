@@ -802,6 +802,15 @@
             recoilKick: 0,
             recoilPitch: 0,
             recoilYaw: 0,
+            recoilVelocityPitch: 0,
+            recoilVelocityYaw: 0,
+            lookSway: { x: 0, y: 0 },
+            lookSwayTarget: { x: 0, y: 0 },
+            movementLean: 0,
+            landingKick: 0,
+            footstepKick: 0,
+            lastFootstepIndex: -1,
+            weaponCycleTimer: 0,
             isReloading: false,
             reloadProgress: 0,
             ammo: 35,
@@ -2346,6 +2355,11 @@
             chargingHandle.position.set(0, 0.053, -0.095);
             gunCore.add(chargingHandle);
             gun.userData.chargingHandle = chargingHandle;
+            gun.userData.fireCyclePart = chargingHandle;
+            gun.userData.fireCycleAxis = 'z';
+            gun.userData.fireCycleRest = chargingHandle.position.z;
+            gun.userData.fireCycleOffset = -0.038;
+            gun.userData.fireCycleDuration = 0.14;
 
             // Picatinny Üst Ray Sistemi
             const topRail = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.010, 0.50), sharedMaterials.gunPolymer);
@@ -2647,6 +2661,11 @@
             chargingHandle.position.set(-0.036, 0.045, -0.015);
             core.add(chargingHandle);
             gun.userData.chargingHandle = chargingHandle;
+            gun.userData.fireCyclePart = chargingHandle;
+            gun.userData.fireCycleAxis = 'z';
+            gun.userData.fireCycleRest = chargingHandle.position.z;
+            gun.userData.fireCycleOffset = 0.034;
+            gun.userData.fireCycleDuration = 0.16;
 
             const flash = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.20, 8), new THREE.MeshBasicMaterial({ color: 0xffc857, transparent: true, opacity: 0 }));
             flash.rotation.x = -Math.PI / 2;
@@ -2793,6 +2812,21 @@
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.074, 0.38), sharedMaterials.gunFDE);
             receiver.position.set(0, 0.034, 0.07);
             core.add(receiver);
+            const boltGroup = new THREE.Group();
+            boltGroup.position.set(-0.038, 0.052, 0.015);
+            const boltHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.046, 10), sharedMaterials.gunMetal);
+            boltHandle.rotation.x = Math.PI / 2;
+            boltHandle.position.x = -0.012;
+            boltGroup.add(boltHandle);
+            const boltCap = new THREE.Mesh(new THREE.SphereGeometry(0.011, 10, 8), sharedMaterials.gunAccentNeon);
+            boltCap.position.set(-0.012, 0, -0.026);
+            boltGroup.add(boltCap);
+            core.add(boltGroup);
+            gun.userData.fireCyclePart = boltGroup;
+            gun.userData.fireCycleAxis = 'z';
+            gun.userData.fireCycleRest = boltGroup.position.z;
+            gun.userData.fireCycleOffset = -0.050;
+            gun.userData.fireCycleDuration = 0.34;
             const cheekRest = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.028, 0.20), sharedMaterials.gunPolymer);
             cheekRest.position.set(0, 0.083, -0.16);
             core.add(cheekRest);
@@ -2886,6 +2920,11 @@
             const slide = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.048, 0.23), sharedMaterials.gunFDE);
             slide.position.set(0, 0.038, 0.02);
             core.add(slide);
+            gun.userData.fireCyclePart = slide;
+            gun.userData.fireCycleAxis = 'z';
+            gun.userData.fireCycleRest = slide.position.z;
+            gun.userData.fireCycleOffset = -0.052;
+            gun.userData.fireCycleDuration = 0.19;
             const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.17, 16), sharedMaterials.gunBarrelSteel);
             barrel.rotation.x = Math.PI / 2;
             barrel.position.set(0, 0.039, 0.19);
@@ -3608,6 +3647,15 @@
               f[name].pipJoint.rotation.set(1.35, 0, 0);
               f[name].dipJoint.rotation.set(0.92, 0, 0);
             });
+                    } else if (role === 'LEFT_RELOAD') {
+                        const grip = THREE.MathUtils.clamp(triggerPull, 0, 1);
+                        thumbBase.rotation.set(0.42 + grip * 0.18, -side * 0.20, side * 0.28);
+                        thumbDistal.rotation.set(0.32 + grip * 0.22, 0, 0);
+                        ['index', 'middle', 'ring', 'pinky'].forEach((name, idx) => {
+                            f[name].mcpJoint.rotation.set(0.62 + grip * 0.66 + idx * 0.025, 0, 0);
+                            f[name].pipJoint.rotation.set(0.82 + grip * 0.54, 0, 0);
+                            f[name].dipJoint.rotation.set(0.48 + grip * 0.34, 0, 0);
+                        });
           } else if (role === 'RIGHT_KARAMBIT') {
             thumbBase.rotation.set(0.42, -0.18, 0.48);
             thumbDistal.rotation.set(0.35, 0, 0);
@@ -3664,6 +3712,7 @@
             state.equipTransition = Math.max(0, state.equipTransition - dt * 4.5);
           }
           const equipDrop = state.equipTransition * 0.07;
+          const equipSnap = Math.sin((1 - state.equipTransition) * Math.PI);
           
           let hipPos, adsPos;
           if (isKnife) {
@@ -3683,12 +3732,20 @@
           }
           
           mount.position.lerpVectors(hipPos, adsPos, adsFactor);
+          mount.position.x += state.lookSway.x + state.movementLean * 0.018;
+          mount.position.y -= state.lookSway.y * 0.42 + state.landingKick * 0.045 + state.footstepKick * 0.006;
+          mount.position.z -= state.landingKick * 0.035;
           mount.position.y += recoilOffset * 0.007;
           mount.position.z += recoilOffset * 0.036;
+          mount.position.y += equipSnap * 0.018;
           
-          let rotX = recoilOffset * 0.11;
-          let rotY = isKnife ? 0.0 : THREE.MathUtils.lerp(0.055, 0.0, adsFactor);
-          let rotZ = isKnife ? 0.0 : THREE.MathUtils.lerp(0.035, 0.0, adsFactor);
+          let rotX = recoilOffset * 0.11 + state.lookSway.y * 0.62;
+          let rotY = (isKnife ? 0.0 : THREE.MathUtils.lerp(0.055, 0.0, adsFactor)) - state.lookSway.x * 0.72;
+          let rotZ = (isKnife ? 0.0 : THREE.MathUtils.lerp(0.035, 0.0, adsFactor)) - state.movementLean * 0.075;
+          rotX += state.landingKick * 0.12 + state.footstepKick * 0.018;
+          rotZ += state.movementLean * 0.025;
+          rotX += equipSnap * 0.14;
+          rotZ -= equipSnap * 0.10;
           
           if (state.isReloading && !isKnife) {
             const rSin = Math.sin(state.reloadProgress * Math.PI);
@@ -3813,6 +3870,14 @@
                             rifleData.chargingHandle.position.z = -0.095 - inspect * 0.035;
                         }
                     }
+
+                    const fireCyclePart = rifleData.fireCyclePart;
+                    if (fireCyclePart && !state.isReloading) {
+                        const cycleDuration = rifleData.fireCycleDuration || 0.16;
+                        const cycleProgress = 1 - THREE.MathUtils.clamp(state.weaponCycleTimer / cycleDuration, 0, 1);
+                        const cycleImpulse = Math.sin(cycleProgress * Math.PI);
+                        fireCyclePart.position[rifleData.fireCycleAxis || 'z'] = rifleData.fireCycleRest + (rifleData.fireCycleOffset || 0) * cycleImpulse;
+                    }
           
           const invContainerMat = new THREE.Matrix4().copy(skeletonRig.armsContainer.matrixWorld).invert();
           
@@ -3890,7 +3955,12 @@
           
           const rightHandRole = !isKnife ? 'RIGHT_RIFLE' : (state.equipped === 'KARAMBIT' ? 'RIGHT_KARAMBIT' : 'RIGHT_KNIFE');
           poseHandForWeapon(skeletonRig.rightHand, 1, rightHandRole, state.recoilKick);
-          poseHandForWeapon(skeletonRig.leftHand, -1, isKnife ? 'LEFT_KNIFE_GUARD' : 'LEFT_CCLAMP', 0);
+          const reloadProgress = THREE.MathUtils.clamp(state.reloadProgress, 0, 1);
+          const removeGrip = THREE.MathUtils.smoothstep(reloadProgress, 0.08, 0.22) * (1 - THREE.MathUtils.smoothstep(reloadProgress, 0.34, 0.46));
+          const insertGrip = THREE.MathUtils.smoothstep(reloadProgress, 0.46, 0.60) * (1 - THREE.MathUtils.smoothstep(reloadProgress, 0.78, 0.92));
+          const reloadGrip = state.isReloading ? Math.max(removeGrip, insertGrip) : 0;
+          const leftHandRole = isKnife ? 'LEFT_KNIFE_GUARD' : (state.isReloading ? 'LEFT_RELOAD' : 'LEFT_CCLAMP');
+          poseHandForWeapon(skeletonRig.leftHand, -1, leftHandRole, reloadGrip);
           
                     const activeFirearm = getActiveFirearmModel();
                     if (activeFirearm.userData.triggerShoe) {
@@ -4041,9 +4111,10 @@
 
             const recoilScale = firearm.userData.recoilScale || 1.0;
             state.recoilKick = Math.min(1.5, recoilScale);
+            state.weaponCycleTimer = firearm.userData.fireCycleDuration || 0.16;
             const adsRecoilMult = state.isADS ? 0.48 : 1.0;
-            state.recoilPitch += (0.016 + Math.random() * 0.005) * recoilScale * adsRecoilMult;
-            state.recoilYaw += (Math.random() - 0.5) * 0.009 * recoilScale * adsRecoilMult;
+            state.recoilVelocityPitch += (0.62 + Math.random() * 0.12) * recoilScale * adsRecoilMult;
+            state.recoilVelocityYaw += (Math.random() - 0.5) * 0.26 * recoilScale * adsRecoilMult;
 
             const flash = firearm.userData.muzzleFlash || muzzleFlashMesh;
             const flashLight = firearm.userData.muzzleLight || muzzleLight;
@@ -4085,6 +4156,7 @@
             state.isADS = false;
             mouseADS = false;
             state.equipTransition = 1.0;
+            state.weaponCycleTimer = 0;
             document.getElementById('btn-touch-ads').classList.remove('pressed');
             weaponTypes.forEach(weaponType => {
                 const model = skeletonRig[weaponType.toLowerCase()];
@@ -4391,6 +4463,9 @@
                         const sens = state.isADS ? 0.0032 : 0.0052;
                         state.yaw -= dx * sens;
                         state.pitch = Math.max(-1.38, Math.min(1.25, state.pitch - dy * sens));
+                        const swayScale = state.isADS ? 0.00045 : 0.0010;
+                        state.lookSwayTarget.x = THREE.MathUtils.clamp(state.lookSwayTarget.x - dx * swayScale, -0.12, 0.12);
+                        state.lookSwayTarget.y = THREE.MathUtils.clamp(state.lookSwayTarget.y + dy * swayScale, -0.10, 0.10);
                     }
                 }
             });
@@ -4486,6 +4561,9 @@
             if (state.weaponInspectTimer > 0) {
                 state.weaponInspectTimer = Math.max(0, state.weaponInspectTimer - dt);
             }
+            if (state.weaponCycleTimer > 0) {
+                state.weaponCycleTimer = Math.max(0, state.weaponCycleTimer - dt);
+            }
             if (state.isReloading) {
                 state.reloadProgress += dt / (getActiveFirearmModel().userData.reloadDuration || 1.25);
                 if (state.reloadProgress >= 1.0) {
@@ -4536,14 +4614,24 @@
                 state.position.addScaledVector(worldMove, speedMult * moveMag * dt);
                 state.walkCycle += dt * speedMult * 2.4 * moveMag;
                 state.walkSpeed = THREE.MathUtils.lerp(state.walkSpeed, moveMag, dt * 10);
+                state.movementLean = THREE.MathUtils.lerp(state.movementLean, moveVec.x * moveMag, dt * 8);
+                const footstepIndex = Math.floor(state.walkCycle / Math.PI);
+                if (state.isGrounded && footstepIndex !== state.lastFootstepIndex) {
+                    state.footstepKick = Math.max(state.footstepKick, 0.82);
+                    state.lastFootstepIndex = footstepIndex;
+                }
             } else {
                 state.walkSpeed = THREE.MathUtils.lerp(state.walkSpeed, 0, dt * 10);
+                state.movementLean = THREE.MathUtils.lerp(state.movementLean, 0, dt * 7);
+                if (state.walkSpeed < 0.04) state.lastFootstepIndex = -1;
             }
 
             if (!state.isGrounded || state.velocityY > 0) {
+                const fallSpeed = Math.abs(state.velocityY);
                 state.position.y += state.velocityY * dt;
                 state.velocityY -= 12.5 * dt;
                 if (state.position.y <= 0) {
+                    if (!state.isGrounded) state.landingKick = THREE.MathUtils.clamp(fallSpeed * 0.22, 0.35, 1.2);
                     state.position.y = 0;
                     state.velocityY = 0;
                     state.isGrounded = true;
@@ -4575,12 +4663,25 @@
             const totalPitch = state.pitch + state.recoilPitch;
             skeletonRig.lowerSpine.rotation.x = totalPitch * 0.20 - state.crouchLerp * 0.15;
             skeletonRig.spine.rotation.x = totalPitch * 0.45;
+            skeletonRig.spine.rotation.z = state.movementLean * 0.075;
             skeletonRig.neck.rotation.x = totalPitch * 0.35;
-            skeletonRig.armsContainer.rotation.x = totalPitch * 0.35;
+            skeletonRig.armsContainer.rotation.x = totalPitch * 0.35 + state.landingKick * 0.08;
+            skeletonRig.armsContainer.rotation.z = state.movementLean * 0.045;
 
             state.recoilKick = THREE.MathUtils.lerp(state.recoilKick, 0.0, dt * 16);
-            state.recoilPitch = THREE.MathUtils.lerp(state.recoilPitch, 0.0, dt * 10);
-            state.recoilYaw = THREE.MathUtils.lerp(state.recoilYaw, 0.0, dt * 10);
+            state.recoilVelocityPitch += (-state.recoilPitch * 82 - state.recoilVelocityPitch * 17) * dt;
+            state.recoilVelocityYaw += (-state.recoilYaw * 70 - state.recoilVelocityYaw * 16) * dt;
+            state.recoilPitch = THREE.MathUtils.clamp(state.recoilPitch + state.recoilVelocityPitch * dt, -0.3, 0.3);
+            state.recoilYaw = THREE.MathUtils.clamp(state.recoilYaw + state.recoilVelocityYaw * dt, -0.2, 0.2);
+
+            const swayBlend = 1 - Math.exp(-dt * 18);
+            const swayDecay = Math.exp(-dt * 5.5);
+            state.lookSway.x = THREE.MathUtils.lerp(state.lookSway.x, state.lookSwayTarget.x, swayBlend);
+            state.lookSway.y = THREE.MathUtils.lerp(state.lookSway.y, state.lookSwayTarget.y, swayBlend);
+            state.lookSwayTarget.x *= swayDecay;
+            state.lookSwayTarget.y *= swayDecay;
+            state.landingKick *= Math.exp(-dt * 7.5);
+            state.footstepKick *= Math.exp(-dt * 12);
 
             [skeletonRig.rifle, skeletonRig.ak47, skeletonRig.awp, skeletonRig.deagle].forEach(firearm => {
                 if (!firearm) return;
