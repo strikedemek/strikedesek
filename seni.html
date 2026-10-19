@@ -415,8 +415,6 @@
             <span class="text-slate-500">|</span>
             <span id="pitch-telemetry" class="mono text-slate-300">Pitch: 0° | Yaw: 0°</span>
             <span class="text-slate-500 hidden sm:inline">|</span>
-            <span id="operator-faction-label" class="mono text-lime-200 hidden sm:inline">CT · ÖZEL TİM</span>
-            <span class="text-slate-500 hidden sm:inline">|</span>
             <span id="skin-telemetry" class="mono text-amber-300 hidden sm:inline">Skin: CS2 FADE</span>
         </div>
     </div>
@@ -500,18 +498,6 @@
             <button id="btn-equip-huntsman" onclick="equipWeapon('HUNTSMAN')" class="hud-btn px-2 py-2 rounded-lg text-[10px] font-bold border border-slate-700/80 text-slate-200 flex flex-col items-center gap-0.5">
                 <span class="text-sm">⚔️</span> <span>Huntsman</span>
             </button>
-        </div>
-
-        <div class="pt-1.5 border-t border-slate-700/60">
-            <div class="text-[10px] text-slate-300 font-bold mb-1.5">Operatör Üniforması</div>
-            <div class="grid grid-cols-2 gap-1.5">
-                <button id="btn-faction-ct" aria-pressed="true" onclick="setTeamFaction('CT')" class="hud-btn active px-2 py-2 rounded-lg text-[10px] font-bold border border-transparent flex items-center justify-center gap-2">
-                    <span class="text-sm">🛡️</span><span>CT · Özel Tim</span>
-                </button>
-                <button id="btn-faction-t" aria-pressed="false" onclick="setTeamFaction('T')" class="hud-btn px-2 py-2 rounded-lg text-[10px] font-bold border border-slate-700/80 text-slate-200 flex items-center justify-center gap-2">
-                    <span class="text-sm">🎭</span><span>T · Saha Operatörü</span>
-                </button>
-            </div>
         </div>
 
         <!-- CS2 Metalik & Özel Kaplama Desenleri (20 Çeşit) -->
@@ -793,7 +779,6 @@
         const state = {
             cameraMode: 'FPS',
             skinMode: 'GLOVED',
-            faction: 'CT',
             weaponTheme: 'FADE',
             gloveTheme: 'VICE',
             metallicRoughness: 0.08,
@@ -839,8 +824,45 @@
             knifeHeavyStab: false,
             knifeComboIndex: 0,
             weaponInspectTimer: 0,
+            weaponInspectDuration: 1.4,
+            inspectCueIndex: 0,
             equipTransition: 0
         };
+
+        const weaponInspectProfiles = {
+            RIFLE: { duration: 1.95, axis: [0, 1, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.20, -0.08, 0.18, 0.12, 0, 0, 0.2], [0.48, 0.04, 0.44, 0.28, 0, 0, 0.75], [0.72, -0.12, 0.24, -0.12, 0, 0, 0.45], [1, 0, 0, 0, 0, 0, 0]] },
+            AK47: { duration: 2.05, axis: [0, 1, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.18, -0.10, -0.24, 0.16, 0, 0, 0.25], [0.43, 0.08, 0.36, -0.22, 0, 0, 0.7], [0.70, -0.04, 0.22, 0.12, 0, 0, 0.35], [1, 0, 0, 0, 0, 0, 0]] },
+            AWP: { duration: 2.35, axis: [1, 0, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.22, 0.10, -0.24, -0.12, 0, 0, 0.2], [0.48, -0.06, 0.34, 0.18, 0, 0, 0.45], [0.72, 0.04, 0.18, -0.08, 0, 0, 0.8], [1, 0, 0, 0, 0, 0, 0]] },
+            DEAGLE: { duration: 1.8, axis: [0, 0, 1], frames: [[0, 0, 0, 0, 0, 0, 0], [0.18, -0.12, 0.14, 0.12, 0, 0, 0.25], [0.43, 0.08, -0.28, 0.22, 0, 0, 0.75], [0.70, -0.04, 0.18, -0.14, 0, 0, 0.4], [1, 0, 0, 0, 0, 0, 0]] },
+            BAYONET: { duration: 1.9, axis: [0, 1, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.18, -0.12, 0.18, -0.16, 0.35, 0, 0.2], [0.44, 0.08, 0.34, 0.24, 1.8, 0, 0.75], [0.72, -0.06, 0.20, -0.10, 3.0, 0, 0.4], [1, 0, 0, 0, 3.1, 0, 0]] },
+            KARAMBIT: { duration: 2.2, axis: [1, 0, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.16, -0.12, 0.20, -0.18, 1.3, 0, 0.25], [0.38, 0.08, 0.38, 0.28, 4.2, 0, 0.8], [0.66, -0.05, 0.20, -0.12, 7.1, 0, 0.55], [0.84, 0.02, -0.08, 0.06, 8.2, 0, 0.25], [1, 0, 0, 0, 8.2, 0, 0]] },
+            BUTTERFLY: { duration: 2.1, axis: [1, 0, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.18, -0.14, 0.12, -0.20, 0, 0.85, 0.25], [0.40, 0.04, 0.30, 0.28, 0, -1.15, 0.75], [0.62, -0.06, 0.42, -0.16, 0, 1.25, 0.9], [0.84, 0.04, 0.12, 0.08, 0, 0.28, 0.5], [1, 0, 0, 0, 0, 0, 0]] },
+            TALON: { duration: 1.85, axis: [0, 0, 1], frames: [[0, 0, 0, 0, 0, 0, 0], [0.18, -0.10, 0.16, -0.15, 0.4, 0, 0.2], [0.43, 0.10, 0.26, 0.20, 2.3, 0, 0.65], [0.72, -0.05, 0.16, -0.08, 3.8, 0, 0.4], [1, 0, 0, 0, 3.8, 0, 0]] },
+            BOWIE: { duration: 1.9, axis: [0, 1, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.20, -0.08, 0.18, -0.14, 0.15, 0, 0.2], [0.48, 0.08, 0.36, 0.20, 0.55, 0, 0.65], [0.74, -0.04, 0.18, -0.08, 0.8, 0, 0.35], [1, 0, 0, 0, 0.8, 0, 0]] },
+            HUNTSMAN: { duration: 1.95, axis: [0, 1, 0], frames: [[0, 0, 0, 0, 0, 0, 0], [0.18, -0.12, 0.20, 0.12, 0.2, 0, 0.2], [0.45, 0.06, 0.40, -0.22, 0.85, 0, 0.75], [0.73, -0.05, 0.18, 0.08, 1.2, 0, 0.4], [1, 0, 0, 0, 1.2, 0, 0]] }
+        };
+
+        function sampleInspectProfile(type, progress) {
+            const profile = weaponInspectProfiles[type] || weaponInspectProfiles.RIFLE;
+            const frames = profile.frames;
+            const clampedProgress = THREE.MathUtils.clamp(progress, 0, 1);
+            let previousFrame = frames[0];
+            let nextFrame = frames[frames.length - 1];
+            for (let index = 1; index < frames.length; index++) {
+                if (clampedProgress <= frames[index][0]) {
+                    previousFrame = frames[index - 1];
+                    nextFrame = frames[index];
+                    break;
+                }
+            }
+            const segmentProgress = (clampedProgress - previousFrame[0]) / Math.max(0.0001, nextFrame[0] - previousFrame[0]);
+            const blend = THREE.MathUtils.smootherstep(segmentProgress, 0, 1);
+            const values = [];
+            for (let index = 1; index < previousFrame.length; index++) {
+                values.push(THREE.MathUtils.lerp(previousFrame[index] || 0, nextFrame[index] || 0, blend));
+            }
+            return { profile, rotX: values[0], rotY: values[1], rotZ: values[2], spin: values[3], flip: values[4], grip: values[5] };
+        }
 
         let joystickPointerId = null;
         let lookPointerId = null;
@@ -926,6 +948,30 @@
                     ringGain.connect(audioCtx.destination);
                     ringOsc.start(now);
                     ringOsc.stop(now + 0.09);
+                } else if (type === 'inspect-click') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(1850, now);
+                    osc.frequency.exponentialRampToValueAtTime(620, now + 0.045);
+                    gain.gain.setValueAtTime(0.13, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.06);
+                } else if (type === 'inspect-catch') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(2900, now);
+                    osc.frequency.exponentialRampToValueAtTime(980, now + 0.075);
+                    gain.gain.setValueAtTime(0.09, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.085);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.09);
                 } else if (type === 'hit') {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
@@ -1020,7 +1066,6 @@
         let sharedMaterials = {};
         let weaponSkinTextures = {};
         let gloveSkinTextures = {};
-        let uniformTextures = {};
 
         // CS2 Metalik Bıçak ve Silahların Işıl Işıl Parlaması İçin Prosedürel Stüdyo Cubemap Yansıması
         function createCS2MetallicEnvMap() {
@@ -1059,7 +1104,6 @@
                 faces.push(c);
             }
             const cubeTex = new THREE.CubeTexture(faces);
-            cubeTex.encoding = THREE.sRGBEncoding;
             cubeTex.needsUpdate = true;
             return cubeTex;
         }
@@ -1395,7 +1439,6 @@
             }
 
             const tex = new THREE.CanvasTexture(c);
-            tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
             return tex;
@@ -1534,7 +1577,6 @@
             }
 
             const tex = new THREE.CanvasTexture(dCanvas);
-            tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
             return tex;
@@ -1659,7 +1701,6 @@
             }
 
             const tex = new THREE.CanvasTexture(c);
-            tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
             tex.repeat.set(2, 2);
@@ -1744,87 +1785,12 @@
                 }
             }, 1, 2);
 
-            const steelRoughness = createTile(256, (ctx, size) => {
-                ctx.fillStyle = '#c8c8c8'; ctx.fillRect(0, 0, size, size);
-                for (let y = 0; y < size; y += 8) {
-                    const value = 174 + Math.round((Math.sin(y * 0.19) + Math.cos(y * 0.07)) * 13);
-                    ctx.fillStyle = `rgb(${value},${value},${value})`; ctx.fillRect(0, y, size, 3);
-                }
-            }, 3, 1);
-
-            const polymerRoughness = createTile(256, (ctx, size) => {
-                ctx.fillStyle = '#d8d8d8'; ctx.fillRect(0, 0, size, size);
-                for (let y = 4; y < size; y += 16) for (let x = 4; x < size; x += 16) {
-                    const value = 178 + ((x * 5 + y * 11) % 36);
-                    ctx.fillStyle = `rgb(${value},${value},${value})`; ctx.fillRect(x, y, 4, 4);
-                }
-            }, 2, 3);
-
-            const woodRoughness = createTile(256, (ctx, size) => {
-                ctx.fillStyle = '#dfdfdf'; ctx.fillRect(0, 0, size, size);
-                ctx.strokeStyle = 'rgba(65,65,65,0.30)'; ctx.lineWidth = 3;
-                for (let y = 0; y < size; y += 16) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(size, y + Math.sin(y * 0.1) * 5); ctx.stroke(); }
-            }, 1, 2);
-
-            const skinPoreBump = createTile(256, (ctx, size) => {
-                ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, size, size);
-                for (let y = 2; y < size; y += 5) for (let x = 2; x < size; x += 5) {
-                    const noise = (x * 37 + y * 19 + x * y) % 17;
-                    const value = 112 + noise * 2;
-                    ctx.fillStyle = `rgb(${value},${value},${value})`;
-                    ctx.beginPath(); ctx.arc(x, y, 0.45 + (noise % 3) * 0.18, 0, Math.PI * 2); ctx.fill();
-                }
-            }, 2, 2);
-
-            const skinRoughness = createTile(256, (ctx, size) => {
-                ctx.fillStyle = '#d7d7d7'; ctx.fillRect(0, 0, size, size);
-                for (let y = 0; y < size; y += 16) {
-                    const value = 194 + Math.round((Math.sin(y * 0.08) + 1) * 12);
-                    ctx.fillStyle = `rgb(${value},${value},${value})`; ctx.fillRect(0, y, size, 8);
-                }
-            }, 2, 2);
-
-            return { brushedSteelBump, polymerBump, rubberBump, woodAlbedo, woodBump, steelRoughness, polymerRoughness, woodRoughness, skinPoreBump, skinRoughness };
-        }
-
-        function buildUniformTexture(faction) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            if (faction === 'CT') {
-                const base = ctx.createLinearGradient(0, 0, 512, 512);
-                base.addColorStop(0, '#52615e'); base.addColorStop(0.48, '#394744'); base.addColorStop(1, '#252f2d');
-                ctx.fillStyle = base; ctx.fillRect(0, 0, 512, 512);
-                ctx.strokeStyle = 'rgba(180,196,179,0.10)'; ctx.lineWidth = 2;
-                for (let i = 0; i <= 512; i += 8) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke(); }
-                ctx.strokeStyle = 'rgba(20,31,29,0.28)'; ctx.lineWidth = 5;
-                for (let y = 12; y < 512; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(512, y + 8); ctx.stroke(); }
-            } else {
-                const base = ctx.createLinearGradient(0, 0, 512, 512);
-                base.addColorStop(0, '#9a8b64'); base.addColorStop(0.52, '#6c684d'); base.addColorStop(1, '#383b2e');
-                ctx.fillStyle = base; ctx.fillRect(0, 0, 512, 512);
-                const camo = ['rgba(48,57,39,0.82)', 'rgba(130,104,62,0.78)', 'rgba(181,157,111,0.62)', 'rgba(67,76,54,0.76)'];
-                for (let i = 0; i < 125; i++) {
-                    const x = (i * 173) % 512, y = (i * 293) % 512;
-                    ctx.fillStyle = camo[i % camo.length];
-                    ctx.beginPath(); ctx.ellipse(x, y, 14 + i % 21, 6 + (i * 7) % 15, Math.sin(i * 1.73) * 1.3, 0, Math.PI * 2); ctx.fill();
-                }
-                ctx.strokeStyle = 'rgba(223,208,165,0.12)'; ctx.lineWidth = 2;
-                for (let i = 0; i < 512; i += 9) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke(); }
-            }
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.encoding = THREE.sRGBEncoding;
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(2, 3);
-            return texture;
+            return { brushedSteelBump, polymerBump, rubberBump, woodAlbedo, woodBump };
         }
 
         function createAnatomicalAndWeaponTextures() {
             metallicEnvCubeMap = createCS2MetallicEnvMap();
             const surfaceDetails = createSurfaceDetailTextures();
-            uniformTextures = { CT: buildUniformTexture('CT'), T: buildUniformTexture('T') };
 
             const skinCanvas = document.createElement('canvas');
             skinCanvas.width = 512; skinCanvas.height = 512;
@@ -1843,7 +1809,6 @@
                 sCtx.fill();
             }
             const skinAlbedoTex = new THREE.CanvasTexture(skinCanvas);
-            skinAlbedoTex.encoding = THREE.sRGBEncoding;
 
             const mCanvas = document.createElement('canvas');
             mCanvas.width = 512; mCanvas.height = 512;
@@ -1876,36 +1841,19 @@
                 muscleBumpTex,
                 gloveTex: gloveSkinTextures.VICE.tex,
                 gunAnimeTex: weaponSkinTextures.FADE.gun,
-                damascusTex: weaponSkinTextures.FADE.blade,
-                surfaceDetails,
-                uniformTextures
+                damascusTex: weaponSkinTextures.FADE.blade
+                ,surfaceDetails
             };
         }
 
         function initMaterials(textures) {
-            const { skinAlbedoTex, muscleBumpTex, gloveTex, gunAnimeTex, damascusTex, surfaceDetails, uniformTextures: uniformMaps } = textures;
+            const { skinAlbedoTex, muscleBumpTex, gloveTex, gunAnimeTex, damascusTex, surfaceDetails } = textures;
 
             sharedMaterials.skin = new THREE.MeshStandardMaterial({
                 map: skinAlbedoTex,
                 color: 0xf7dcc8,
-                roughness: 0.56,
-                metalness: 0.01,
-                bumpMap: surfaceDetails.skinPoreBump,
-                bumpScale: 0.0012,
-                roughnessMap: surfaceDetails.skinRoughness
-            });
-            sharedMaterials.skinShadow = new THREE.MeshStandardMaterial({
-                color: 0x986b59,
-                roughness: 0.62,
-                metalness: 0.01
-            });
-            sharedMaterials.stubble = new THREE.MeshStandardMaterial({
-                color: 0x302a26,
-                transparent: true,
-                opacity: 0.22,
-                depthWrite: false,
-                roughness: 0.95,
-                metalness: 0
+                roughness: 0.44,
+                metalness: 0.02
             });
             sharedMaterials.gloveLeather = new THREE.MeshStandardMaterial({
                 map: gloveTex,
@@ -1954,112 +1902,31 @@
                 roughness: 0.58,
                 metalness: 0.12
             });
-            sharedMaterials.hairHighlight = new THREE.MeshStandardMaterial({
-                color: 0x403b35,
-                roughness: 0.64,
-                metalness: 0.02
-            });
             sharedMaterials.sclera = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.12 });
-            sharedMaterials.eyeHighlight = new THREE.MeshBasicMaterial({ color: 0xffffff });
             sharedMaterials.iris = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.18 });
             sharedMaterials.pupil = new THREE.MeshBasicMaterial({ color: 0x050505 });
             sharedMaterials.shorts = new THREE.MeshStandardMaterial({
-                map: uniformMaps.CT,
-                roughness: 0.88,
-                metalness: 0.01,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.002,
-                roughnessMap: surfaceDetails.polymerRoughness
-            });
-            sharedMaterials.uniformFabric = new THREE.MeshStandardMaterial({
-                map: uniformMaps.CT,
-                color: 0xd8dfd3,
-                roughness: 0.92,
-                metalness: 0.01,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.0025
-            });
-            sharedMaterials.uniformShade = new THREE.MeshStandardMaterial({
-                map: uniformMaps.CT,
-                color: 0x9da89d,
-                roughness: 0.94,
-                metalness: 0.01,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.0025
-            });
-            sharedMaterials.plateCarrier = new THREE.MeshStandardMaterial({
-                color: 0x39413d,
-                roughness: 0.82,
-                metalness: 0.04,
-                map: uniformMaps.CT,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.003
-            });
-            sharedMaterials.armorPlate = new THREE.MeshStandardMaterial({
-                color: 0x26302e,
-                roughness: 0.64,
-                metalness: 0.22,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.0015,
-                envMap: metallicEnvCubeMap,
-                envMapIntensity: 0.45
-            });
-            sharedMaterials.helmetShell = new THREE.MeshStandardMaterial({
-                color: 0x46514b,
-                roughness: 0.58,
-                metalness: 0.12,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.002,
-                envMap: metallicEnvCubeMap,
-                envMapIntensity: 0.35
-            });
-            sharedMaterials.webbing = new THREE.MeshStandardMaterial({
-                color: 0x696448,
-                roughness: 0.91,
-                metalness: 0.01,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.003
-            });
-            sharedMaterials.bootRubber = new THREE.MeshStandardMaterial({
-                color: 0x171a18,
-                roughness: 0.84,
-                metalness: 0.02,
-                bumpMap: surfaceDetails.rubberBump,
+                color: 0x1e293b,
+                roughness: 0.72,
+                bumpMap: gloveTex,
                 bumpScale: 0.004
             });
-
-            sharedMaterials.woodStock = new THREE.MeshStandardMaterial({
-                map: surfaceDetails.woodAlbedo,
-                bumpMap: surfaceDetails.woodBump,
-                bumpScale: 0.018,
-                roughnessMap: surfaceDetails.woodRoughness,
-                roughness: 0.58,
-                metalness: 0.02
-            });
-            sharedMaterials.woodDark = sharedMaterials.woodStock.clone();
-            sharedMaterials.woodDark.color.set(0x9a7458);
-            sharedMaterials.stockGreen = sharedMaterials.woodStock.clone();
-            sharedMaterials.stockGreen.color.set(0x6b967f);
 
             // CS2 Yüksek Metalik Silah & Bıçak Materyalleri (EnvMap Destekli)
             sharedMaterials.gunMetal = new THREE.MeshStandardMaterial({
                 color: 0x1e2430,
-                roughness: 0.26,
-                metalness: 0.88,
-                bumpMap: surfaceDetails.brushedSteelBump,
-                bumpScale: 0.0018,
-                roughnessMap: surfaceDetails.steelRoughness,
+                roughness: 0.20,
+                metalness: 0.94,
+                bumpMap: gloveTex,
+                bumpScale: 0.002,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.35
             });
             sharedMaterials.gunFDE = new THREE.MeshStandardMaterial({
                 map: gunAnimeTex,
                 color: 0xffffff,
-                roughness: 0.24,
-                metalness: 0.76,
-                bumpMap: surfaceDetails.brushedSteelBump,
-                bumpScale: 0.00075,
-                roughnessMap: surfaceDetails.steelRoughness,
+                roughness: 0.14,
+                metalness: 0.86,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.45
             });
@@ -2083,21 +1950,17 @@
             });
             sharedMaterials.gunBarrelSteel = new THREE.MeshStandardMaterial({
                 color: 0x94a3b8,
-                roughness: 0.22,
-                metalness: 0.94,
-                bumpMap: surfaceDetails.brushedSteelBump,
-                bumpScale: 0.0014,
-                roughnessMap: surfaceDetails.steelRoughness,
+                roughness: 0.12,
+                metalness: 0.98,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.65
             });
             sharedMaterials.gunPolymer = new THREE.MeshStandardMaterial({
                 color: 0x11141d,
-                roughness: 0.54,
-                metalness: 0.12,
-                bumpMap: surfaceDetails.polymerBump,
-                bumpScale: 0.004,
-                roughnessMap: surfaceDetails.polymerRoughness,
+                roughness: 0.44,
+                metalness: 0.35,
+                bumpMap: gloveTex,
+                bumpScale: 0.006,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 0.5
             });
@@ -2111,11 +1974,10 @@
             sharedMaterials.bayonetBlade = new THREE.MeshStandardMaterial({
                 map: damascusTex,
                 color: 0xffffff,
-                roughness: 0.18,
-                metalness: 0.96,
-                bumpMap: surfaceDetails.brushedSteelBump,
-                bumpScale: 0.0012,
-                roughnessMap: surfaceDetails.steelRoughness,
+                roughness: 0.07,
+                metalness: 0.98,
+                bumpMap: damascusTex,
+                bumpScale: 0.002,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.85
             });
@@ -2129,29 +1991,28 @@
             sharedMaterials.damascusBlade = new THREE.MeshStandardMaterial({
                 map: damascusTex,
                 color: 0xffffff,
-                roughness: 0.16,
-                metalness: 0.97,
-                bumpMap: surfaceDetails.brushedSteelBump,
-                bumpScale: 0.0015,
-                roughnessMap: surfaceDetails.steelRoughness,
+                roughness: 0.06,
+                metalness: 0.99,
+                bumpMap: damascusTex,
+                bumpScale: 0.0025,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.95
             });
             sharedMaterials.knifeGrip = new THREE.MeshStandardMaterial({
                 color: 0x171923,
-                roughness: 0.62,
-                metalness: 0.08,
-                bumpMap: surfaceDetails.rubberBump,
-                bumpScale: 0.0035,
+                roughness: 0.42,
+                metalness: 0.35,
+                bumpMap: gloveTex,
+                bumpScale: 0.009,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 0.6
             });
             sharedMaterials.karambitGrip = new THREE.MeshStandardMaterial({
                 color: 0x1e1b2e,
-                roughness: 0.48,
-                metalness: 0.16,
-                bumpMap: surfaceDetails.rubberBump,
-                bumpScale: 0.003,
+                roughness: 0.30,
+                metalness: 0.55,
+                bumpMap: gloveTex,
+                bumpScale: 0.007,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 0.85
             });
@@ -2251,29 +2112,17 @@
             chinBoss.position.set(0, -0.074, 0.072);
             faceCore.add(chinBoss);
 
-            [-1, 1].forEach(side => {
-                const cheek = createMusclePart(0.026, 0.020, 0.015, 'skin', 16);
-                cheek.position.set(side * 0.048, -0.025, 0.061);
-                cheek.rotation.z = -side * 0.18;
-                faceCore.add(cheek);
-
-                const jaw = createMusclePart(0.018, 0.036, 0.015, 'skin', 14);
-                jaw.position.set(side * 0.058, -0.053, 0.018);
-                jaw.rotation.z = side * 0.18;
-                faceCore.add(jaw);
-            });
-
             const noseBridge = createLoftedAnatomicalMesh(0.048, 10, 14, (v) => ({
-                rx: THREE.MathUtils.lerp(0.015, 0.009, v),
-                rz: THREE.MathUtils.lerp(0.016, 0.011, v),
-                cz: (1 - v) * 0.013
+                rx: THREE.MathUtils.lerp(0.013, 0.0085, v),
+                rz: THREE.MathUtils.lerp(0.015, 0.010, v),
+                cz: (1 - v) * 0.011
             }), 'skin', true);
             noseBridge.position.set(0, 0.006, 0.092);
             noseBridge.rotation.x = -0.22;
             faceCore.add(noseBridge);
 
             const noseTip = createMusclePart(0.0115, 0.010, 0.013, 'skin', 12);
-            noseTip.position.set(0, -0.014, 0.106);
+            noseTip.position.set(0, -0.014, 0.102);
             faceCore.add(noseTip);
 
             [-1, 1].forEach(side => {
@@ -2285,10 +2134,6 @@
                 nostrilHole.scale.set(1.1, 0.45, 1.3);
                 nostrilHole.position.set(side * 0.006, -0.019, 0.097);
                 faceCore.add(nostrilHole);
-
-                const nostrilRim = createMusclePart(0.0085, 0.006, 0.007, 'skin', 12);
-                nostrilRim.position.set(side * 0.0095, -0.014, 0.095);
-                faceCore.add(nostrilRim);
             });
 
             const upperLip = createLoftedAnatomicalMesh(0.052, 12, 12, (v) => {
@@ -2309,16 +2154,6 @@
             lowerLip.position.set(0, -0.049, 0.084);
             faceCore.add(lowerLip);
 
-            const mouthCurve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(-0.025, -0.046, 0.091),
-                new THREE.Vector3(-0.012, -0.045, 0.095),
-                new THREE.Vector3(0, -0.047, 0.096),
-                new THREE.Vector3(0.012, -0.045, 0.095),
-                new THREE.Vector3(0.025, -0.046, 0.091)
-            ]);
-            const mouthLine = new THREE.Mesh(new THREE.TubeGeometry(mouthCurve, 16, 0.0015, 6, false), sharedMaterials.skinShadow);
-            faceCore.add(mouthLine);
-
             [-1, 1].forEach(side => {
                 const eyeGroup = new THREE.Group();
                 eyeGroup.position.set(side * 0.031, 0.018, 0.078);
@@ -2335,10 +2170,6 @@
                 pupil.scale.set(1, 1, 0.3);
                 pupil.position.set(0, 0, 0.0110);
                 eyeGroup.add(pupil);
-
-                const eyeCatchlight = new THREE.Mesh(new THREE.SphereGeometry(0.0015, 8, 8), sharedMaterials.eyeHighlight);
-                eyeCatchlight.position.set(-side * 0.002, 0.003, 0.0122);
-                eyeGroup.add(eyeCatchlight);
 
                 const upperLid = createMusclePart(0.0132, 0.0042, 0.0112, 'skin', 10);
                 upperLid.position.set(0, 0.0060, 0.002);
@@ -2374,16 +2205,6 @@
                 earLobe.position.set(0, -0.022, 0.002);
                 earGroup.add(earLobe);
 
-                const concha = createMusclePart(0.0028, 0.013, 0.006, 'skinShadow', 12);
-                concha.position.set(side * -0.001, 0.002, 0.008);
-                earGroup.add(concha);
-                const antihelix = new THREE.Mesh(new THREE.TorusGeometry(0.010, 0.0018, 6, 12, Math.PI * 1.25), sharedMaterials.skin);
-                antihelix.position.set(0, 0.002, 0.009);
-                antihelix.rotation.y = Math.PI / 2;
-                antihelix.scale.set(0.65, 1.25, 1);
-                skinMeshes.push(antihelix);
-                earGroup.add(antihelix);
-
                 faceCore.add(earGroup);
             });
 
@@ -2399,95 +2220,6 @@
             }, 'hair', true);
             hairCap.position.set(0, 0.084, -0.004);
             faceCore.add(hairCap);
-            for (let strandIndex = -4; strandIndex <= 4; strandIndex++) {
-                const side = strandIndex / 4;
-                const strandCurve = new THREE.CatmullRomCurve3([
-                    new THREE.Vector3(side * 0.025, 0.112, 0.030),
-                    new THREE.Vector3(side * 0.042, 0.145, 0.014),
-                    new THREE.Vector3(side * 0.064, 0.142, -0.018),
-                    new THREE.Vector3(side * 0.078, 0.108, -0.048)
-                ]);
-                const strand = new THREE.Mesh(
-                    new THREE.TubeGeometry(strandCurve, 14, 0.0015 + (strandIndex % 2 === 0 ? 0.0003 : 0), 5, false),
-                    strandIndex % 3 === 0 ? sharedMaterials.hairHighlight : sharedMaterials.hair
-                );
-                faceCore.add(strand);
-            }
-
-            const tStubble = new THREE.Mesh(new THREE.SphereGeometry(1, 22, 14), sharedMaterials.stubble);
-            tStubble.scale.set(0.051, 0.026, 0.006);
-            tStubble.position.set(0, -0.071, 0.064);
-            tStubble.visible = false;
-            faceCore.add(tStubble);
-            headGroup.userData.tStubble = tStubble;
-
-            [-1, 1].forEach(side => {
-                const sideburn = createLoftedAnatomicalMesh(0.052, 8, 12, (v) => ({
-                    rx: THREE.MathUtils.lerp(0.012, 0.008, v),
-                    rz: THREE.MathUtils.lerp(0.012, 0.009, v)
-                }), 'hair', true);
-                sideburn.position.set(side * 0.073, -0.028, -0.005);
-                sideburn.rotation.z = side * -0.08;
-                faceCore.add(sideburn);
-            });
-
-            const ctHeadgear = new THREE.Group();
-            const helmetShell = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 20), sharedMaterials.helmetShell);
-            helmetShell.scale.set(0.104, 0.075, 0.112);
-            helmetShell.position.set(0, 0.111, -0.002);
-            ctHeadgear.add(helmetShell);
-            const helmetRim = new THREE.Mesh(new THREE.CylinderGeometry(0.102, 0.105, 0.014, 32), sharedMaterials.gunPolymer);
-            helmetRim.position.set(0, 0.062, -0.004);
-            ctHeadgear.add(helmetRim);
-            const frontMount = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.026, 0.028), sharedMaterials.gunMetal);
-            frontMount.position.set(0, 0.090, -0.100);
-            ctHeadgear.add(frontMount);
-            [-1, 1].forEach(side => {
-                const earCup = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 12), sharedMaterials.gunPolymer);
-                earCup.scale.set(0.014, 0.030, 0.034);
-                earCup.position.set(side * 0.094, 0.015, -0.002);
-                ctHeadgear.add(earCup);
-                const rail = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.038, 0.054), sharedMaterials.gunMetal);
-                rail.position.set(side * 0.092, 0.034, 0.004);
-                ctHeadgear.add(rail);
-                const strapCurve = new THREE.CatmullRomCurve3([
-                    new THREE.Vector3(side * 0.091, 0.006, -0.015),
-                    new THREE.Vector3(side * 0.086, -0.036, -0.024),
-                    new THREE.Vector3(side * 0.063, -0.073, -0.010)
-                ]);
-                const chinStrap = new THREE.Mesh(new THREE.TubeGeometry(strapCurve, 12, 0.0035, 6, false), sharedMaterials.webbing);
-                ctHeadgear.add(chinStrap);
-            });
-            const chinBuckle = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.010, 0.008), sharedMaterials.gunMetal);
-            chinBuckle.position.set(0, -0.069, -0.009);
-            ctHeadgear.add(chinBuckle);
-            headGroup.add(ctHeadgear);
-            clothesMeshes.push(ctHeadgear);
-
-            const tHeadgear = new THREE.Group();
-            const fieldCap = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 16), sharedMaterials.uniformFabric);
-            fieldCap.scale.set(0.087, 0.050, 0.098);
-            fieldCap.position.set(0, 0.104, -0.006);
-            tHeadgear.add(fieldCap);
-            const capBrim = new THREE.Mesh(new THREE.BoxGeometry(0.128, 0.012, 0.060), sharedMaterials.uniformShade);
-            capBrim.position.set(0, 0.073, -0.061);
-            tHeadgear.add(capBrim);
-            const capSeam = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.018, 0.10), sharedMaterials.webbing);
-            capSeam.position.set(0, 0.14, -0.008);
-            tHeadgear.add(capSeam);
-            const scarfWrap = new THREE.Mesh(new THREE.TorusGeometry(0.058, 0.018, 10, 28), sharedMaterials.uniformShade);
-            scarfWrap.rotation.x = Math.PI / 2;
-            scarfWrap.position.set(0, -0.092, 0.002);
-            tHeadgear.add(scarfWrap);
-            const scarfFold = new THREE.Mesh(new THREE.TorusGeometry(0.060, 0.006, 6, 28), sharedMaterials.webbing);
-            scarfFold.rotation.x = Math.PI / 2;
-            scarfFold.position.set(0, -0.074, -0.002);
-            tHeadgear.add(scarfFold);
-            headGroup.add(tHeadgear);
-            clothesMeshes.push(tHeadgear);
-            tHeadgear.visible = false;
-            headGroup.userData.ctHeadgear = ctHeadgear;
-            headGroup.userData.tHeadgear = tHeadgear;
 
             return headGroup;
         }
@@ -2753,18 +2485,6 @@
             lowerRec.position.set(0, -0.008, 0.005);
             gunCore.add(lowerRec);
 
-            [-1, 1].forEach(side => {
-                [-0.075, -0.015, 0.055, 0.112].forEach(z => {
-                    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.0042, 0.0042, 0.003, 10), sharedMaterials.bayonetEdge);
-                    pin.rotation.z = Math.PI / 2;
-                    pin.position.set(side * 0.0235, 0.031, z);
-                    gunCore.add(pin);
-                    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.0048, 0.001), sharedMaterials.gunPolymer);
-                    slot.position.set(side * 0.0252, 0.031, z);
-                    gunCore.add(slot);
-                });
-            });
-
             // Krom Mekanizma (Bolt Carrier) & Toz Kapağı (Dust Cover)
             const ejectionPort = new THREE.Mesh(new THREE.BoxGeometry(0.007, 0.017, 0.072), sharedMaterials.bayonetEdge);
             ejectionPort.position.set(-0.021, 0.036, 0.025);
@@ -2918,11 +2638,6 @@
                 const sideRail = new THREE.Mesh(new THREE.BoxGeometry(0.0045, 0.0065, 0.255), sharedMaterials.gunCyberCyan);
                 sideRail.position.set(side * 0.0265, 0.032, 0.235);
                 gunCore.add(sideRail);
-                for (let z = 0.13; z <= 0.34; z += 0.035) {
-                    const mlokSlot = new THREE.Mesh(new THREE.BoxGeometry(0.0018, 0.006, 0.012), sharedMaterials.gunPolymer);
-                    mlokSlot.position.set(side * 0.0275, 0.031, z);
-                    gunCore.add(mlokSlot);
-                }
             });
 
             const afgGrip = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.024, 0.085), sharedMaterials.gunPolymer);
@@ -3011,8 +2726,8 @@
             core.rotation.y = Math.PI;
             gun.add(core);
 
-            const wood = sharedMaterials.woodStock;
-            const darkWood = sharedMaterials.woodDark;
+            const wood = new THREE.MeshStandardMaterial({ color: 0x8b451f, roughness: 0.62, metalness: 0.02 });
+            const darkWood = new THREE.MeshStandardMaterial({ color: 0x5b301d, roughness: 0.68, metalness: 0.02 });
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.060, 0.275), sharedMaterials.gunFDE);
             receiver.position.set(0, 0.030, 0.015);
             core.add(receiver);
@@ -3020,16 +2735,6 @@
             dustCover.rotation.x = Math.PI / 2;
             dustCover.position.set(0, 0.064, 0.02);
             core.add(dustCover);
-            const selector = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.009, 0.082), sharedMaterials.gunMetal);
-            selector.position.set(-0.030, 0.002, -0.018);
-            selector.rotation.x = -0.32;
-            core.add(selector);
-            [-0.095, -0.035, 0.025, 0.085].forEach(z => {
-                const rivet = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.003, 10), sharedMaterials.bayonetEdge);
-                rivet.rotation.z = Math.PI / 2;
-                rivet.position.set(-0.028, 0.03, z);
-                core.add(rivet);
-            });
 
             const stock = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.090, 0.205), wood);
             stock.position.set(0, 0.002, -0.205);
@@ -3082,11 +2787,6 @@
                 const shell = new THREE.Mesh(body, sharedMaterials.gunFDE);
                 shell.position.y = -0.09;
                 magazine.add(shell);
-                for (let ridge = 0; ridge < 5; ridge++) {
-                    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.006, 0.044), sharedMaterials.gunMetal);
-                    rib.position.set(0.024, -0.035 - ridge * 0.027, 0);
-                    magazine.add(rib);
-                }
                 const floorPlate = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.012, 0.060), sharedMaterials.gunMetal);
                 floorPlate.position.set(0.018, -0.187, 0);
                 magazine.add(floorPlate);
@@ -3251,7 +2951,7 @@
             const core = new THREE.Group();
             core.rotation.y = Math.PI;
             gun.add(core);
-            const stockMaterial = sharedMaterials.stockGreen;
+            const stockMaterial = new THREE.MeshStandardMaterial({ color: 0x25634f, roughness: 0.48, metalness: 0.06 });
 
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.074, 0.38), sharedMaterials.gunFDE);
             receiver.position.set(0, 0.034, 0.07);
@@ -3308,21 +3008,6 @@
             objective.rotation.x = Math.PI / 2;
             objective.position.set(0, 0.124, 0.18);
             core.add(objective);
-            const elevationTurret = new THREE.Mesh(new THREE.CylinderGeometry(0.031, 0.031, 0.050, 16), sharedMaterials.gunMetal);
-            elevationTurret.position.set(0, 0.083, 0.035);
-            core.add(elevationTurret);
-            const turretCap = new THREE.Mesh(new THREE.CylinderGeometry(0.020, 0.020, 0.008, 16), sharedMaterials.gunAccentNeon);
-            turretCap.position.set(0, 0.113, 0.035);
-            core.add(turretCap);
-            const windageTurret = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.050, 16), sharedMaterials.gunMetal);
-            windageTurret.rotation.z = Math.PI / 2;
-            windageTurret.position.set(0.037, 0.124, 0.035);
-            core.add(windageTurret);
-            [-0.08, -0.045, -0.01, 0.025, 0.06].forEach(z => {
-                const scopeRib = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.032, 0.008), sharedMaterials.gunPolymer);
-                scopeRib.position.set(0, 0.124, z);
-                core.add(scopeRib);
-            });
 
             const triggerGuard = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.004, 8, 18, Math.PI), sharedMaterials.gunMetal);
             triggerGuard.rotation.y = Math.PI / 2;
@@ -3379,11 +3064,6 @@
             const slide = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.048, 0.23), sharedMaterials.gunFDE);
             slide.position.set(0, 0.038, 0.02);
             core.add(slide);
-            [-0.055, -0.038, -0.021, -0.004, 0.013].forEach(z => {
-                const serration = new THREE.Mesh(new THREE.BoxGeometry(0.002, 0.031, 0.004), sharedMaterials.gunMetal);
-                serration.position.set(-0.027, 0.038, z);
-                core.add(serration);
-            });
             gun.userData.fireCyclePart = slide;
             gun.userData.fireCycleAxis = 'z';
             gun.userData.fireCycleRest = slide.position.z;
@@ -3771,26 +3451,6 @@
             clothesMeshes.push(shortsCore);
             pelvisPivot.add(shortsCore);
 
-            const dutyBelt = new THREE.Mesh(new THREE.TorusGeometry(0.145, 0.012, 8, 36), sharedMaterials.webbing);
-            dutyBelt.rotation.x = Math.PI / 2;
-            dutyBelt.position.set(0, -0.008, 0);
-            pelvisPivot.add(dutyBelt);
-            clothesMeshes.push(dutyBelt);
-            const beltBuckle = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.032, 0.010), sharedMaterials.bayonetEdge);
-            beltBuckle.position.set(0, -0.008, -0.15);
-            pelvisPivot.add(beltBuckle);
-            clothesMeshes.push(beltBuckle);
-            [-1, 1].forEach(side => {
-                const beltPouch = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.082, 0.050), sharedMaterials.plateCarrier);
-                beltPouch.position.set(side * 0.118, -0.010, -0.105);
-                pelvisPivot.add(beltPouch);
-                clothesMeshes.push(beltPouch);
-                const flap = new THREE.Mesh(new THREE.BoxGeometry(0.062, 0.018, 0.054), sharedMaterials.webbing);
-                flap.position.set(side * 0.118, 0.033, -0.105);
-                pelvisPivot.add(flap);
-                clothesMeshes.push(flap);
-            });
-
             [-1, 1].forEach(side => {
                 const isRight = side === 1;
                 const hipPivot = new THREE.Group();
@@ -3817,24 +3477,6 @@
                 thighMesh.position.y = -thighLen / 2;
                 hipPivot.add(thighMesh);
 
-                const cargoPant = createLoftedAnatomicalMesh(thighLen + 0.014, 18, 26, (v, theta) => {
-                    const taper = Math.sin(v * Math.PI);
-                    const radius = THREE.MathUtils.lerp(0.064, 0.091, Math.pow(v, 0.65));
-                    return { rx: radius + taper * 0.006, rz: radius + taper * 0.008 * Math.max(0, -Math.cos(theta)) };
-                }, 'uniformFabric', true);
-                cargoPant.position.y = -thighLen / 2;
-                clothesMeshes.push(cargoPant);
-                hipPivot.add(cargoPant);
-
-                const cargoPocket = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.092, 0.018), sharedMaterials.uniformShade);
-                cargoPocket.position.set(side * 0.071, -0.22, -0.060);
-                hipPivot.add(cargoPocket);
-                clothesMeshes.push(cargoPocket);
-                const cargoFlap = new THREE.Mesh(new THREE.BoxGeometry(0.066, 0.022, 0.020), sharedMaterials.webbing);
-                cargoFlap.position.set(side * 0.071, -0.176, -0.061);
-                hipPivot.add(cargoFlap);
-                clothesMeshes.push(cargoFlap);
-
                 const vastusMedialis = createMusclePart(0.026, 0.075, 0.032, 'skin', 12);
                 vastusMedialis.position.set(-side * 0.028, -0.31, -0.038);
                 vastusMedialis.rotation.z = side * 0.15;
@@ -3854,17 +3496,6 @@
                 const patellarTendon = createLoftedAnatomicalMesh(0.048, 6, 10, () => ({ rx: 0.011, rz: 0.006 }), 'tendon');
                 patellarTendon.position.set(0, -0.026, -0.048);
                 kneePivot.add(patellarTendon);
-                const kneepad = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 14), sharedMaterials.armorPlate);
-                kneepad.scale.set(0.059, 0.047, 0.020);
-                kneepad.position.set(0, 0.006, -0.055);
-                kneePivot.add(kneepad);
-                clothesMeshes.push(kneepad);
-                [-1, 1].forEach(sideSign => {
-                    const kneeStrap = new THREE.Mesh(new THREE.BoxGeometry(0.112, 0.012, 0.008), sharedMaterials.webbing);
-                    kneeStrap.position.set(0, sideSign * 0.038, -0.036);
-                    kneePivot.add(kneeStrap);
-                    clothesMeshes.push(kneeStrap);
-                });
 
                 const shinLen = 0.42;
                 const calfShinMesh = createLoftedAnatomicalMesh(shinLen, 16, 24, (v, theta) => {
@@ -3878,13 +3509,6 @@
                 }, 'skin');
                 calfShinMesh.position.y = -shinLen / 2;
                 kneePivot.add(calfShinMesh);
-                const lowerPant = createLoftedAnatomicalMesh(shinLen + 0.01, 16, 24, (v) => ({
-                    rx: THREE.MathUtils.lerp(0.041, 0.058, Math.pow(v, 0.55)) + 0.006,
-                    rz: THREE.MathUtils.lerp(0.040, 0.058, Math.pow(v, 0.55)) + 0.006
-                }), 'uniformFabric', true);
-                lowerPant.position.y = -shinLen / 2;
-                kneePivot.add(lowerPant);
-                clothesMeshes.push(lowerPant);
 
                 [-1, 1].forEach(cSide => {
                     const calfHead = createMusclePart(0.024, 0.085, 0.028, 'skin', 12);
@@ -3905,19 +3529,6 @@
 
                 const foot = buildDetailedFoot(side);
                 anklePivot.add(foot);
-                const bootShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.047, 0.052, 0.090, 16), sharedMaterials.bootRubber);
-                bootShaft.position.set(0, -0.012, 0.004);
-                anklePivot.add(bootShaft);
-                clothesMeshes.push(bootShaft);
-                const bootToe = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), sharedMaterials.bootRubber);
-                bootToe.scale.set(0.052, 0.034, 0.095);
-                bootToe.position.set(0, -0.055, -0.052);
-                anklePivot.add(bootToe);
-                clothesMeshes.push(bootToe);
-                const bootSole = new THREE.Mesh(new THREE.BoxGeometry(0.102, 0.014, 0.188), sharedMaterials.gunPolymer);
-                bootSole.position.set(0, -0.081, -0.032);
-                anklePivot.add(bootSole);
-                clothesMeshes.push(bootSole);
 
                 if (isRight) {
                     skeletonRig.rightHip = hipPivot;
@@ -3985,68 +3596,6 @@
             unifiedTorsoMesh.position.set(0, 0.03, 0);
             upperTorsoPitchPivot.add(unifiedTorsoMesh);
 
-            const combatShirt = createLoftedAnatomicalMesh(0.515, 38, 38, (v, theta) => {
-                const cosT = Math.cos(theta);
-                let rx = v < 0.45 ? THREE.MathUtils.lerp(0.155, 0.171, v / 0.45) : THREE.MathUtils.lerp(0.171, 0.209, Math.min(1, (v - 0.45) / 0.42));
-                let rz = v < 0.45 ? THREE.MathUtils.lerp(0.109, 0.120, v / 0.45) : THREE.MathUtils.lerp(0.120, 0.135, Math.min(1, (v - 0.45) / 0.42));
-                const elbowRoom = Math.max(0, -cosT) * Math.sin(v * Math.PI) * 0.004;
-                return { rx: rx + elbowRoom, rz: rz + elbowRoom };
-            }, 'uniformFabric', true);
-            combatShirt.position.set(0, 0.032, 0);
-            upperTorsoPitchPivot.add(combatShirt);
-            clothesMeshes.push(combatShirt);
-
-            const carrierShell = createLoftedAnatomicalMesh(0.385, 26, 36, (v) => ({
-                rx: THREE.MathUtils.lerp(0.164, 0.199, Math.sin(v * Math.PI)),
-                rz: THREE.MathUtils.lerp(0.118, 0.137, Math.sin(v * Math.PI))
-            }), 'plateCarrier', true);
-            carrierShell.position.set(0, 0.026, 0);
-            upperTorsoPitchPivot.add(carrierShell);
-            clothesMeshes.push(carrierShell);
-
-            [-1, 1].forEach(side => {
-                const shoulderPad = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), sharedMaterials.plateCarrier);
-                shoulderPad.scale.set(0.060, 0.033, 0.064);
-                shoulderPad.position.set(side * 0.174, 0.202, -0.006);
-                upperTorsoPitchPivot.add(shoulderPad);
-                clothesMeshes.push(shoulderPad);
-                const plate = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 14), sharedMaterials.armorPlate);
-                plate.scale.set(0.052, 0.078, 0.015);
-                plate.position.set(side * 0.053, 0.020, -0.139);
-                upperTorsoPitchPivot.add(plate);
-                clothesMeshes.push(plate);
-                const shoulderStrap = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.18, 0.014), sharedMaterials.webbing);
-                shoulderStrap.position.set(side * 0.134, 0.124, -0.107);
-                shoulderStrap.rotation.z = -side * 0.14;
-                upperTorsoPitchPivot.add(shoulderStrap);
-                clothesMeshes.push(shoulderStrap);
-            });
-            for (let pouchIndex = 0; pouchIndex < 4; pouchIndex++) {
-                const x = (pouchIndex - 1.5) * 0.067;
-                const pouch = new THREE.Mesh(new THREE.BoxGeometry(0.056, 0.074, 0.038), sharedMaterials.webbing);
-                pouch.position.set(x, -0.108, -0.149);
-                upperTorsoPitchPivot.add(pouch);
-                clothesMeshes.push(pouch);
-                const flap = new THREE.Mesh(new THREE.BoxGeometry(0.058, 0.018, 0.040), sharedMaterials.plateCarrier);
-                flap.position.set(x, -0.066, -0.149);
-                upperTorsoPitchPivot.add(flap);
-                clothesMeshes.push(flap);
-                const snap = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.003, 10), sharedMaterials.bayonetEdge);
-                snap.rotation.x = Math.PI / 2;
-                snap.position.set(x, -0.066, -0.171);
-                upperTorsoPitchPivot.add(snap);
-                clothesMeshes.push(snap);
-            }
-            const radioPack = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.100, 0.046), sharedMaterials.gunPolymer);
-            radioPack.position.set(-0.145, 0.105, -0.075);
-            upperTorsoPitchPivot.add(radioPack);
-            clothesMeshes.push(radioPack);
-            const radioAntenna = new THREE.Mesh(new THREE.CylinderGeometry(0.002, 0.002, 0.15, 7), sharedMaterials.gunMetal);
-            radioAntenna.position.set(-0.158, 0.222, -0.078);
-            radioAntenna.rotation.z = -0.08;
-            upperTorsoPitchPivot.add(radioAntenna);
-            clothesMeshes.push(radioAntenna);
-
             [-1, 1].forEach(side => {
                 const trapSlope = createMusclePart(0.078, 0.042, 0.056, 'skin', 14);
                 trapSlope.position.set(side * 0.092, 0.258, 0.005);
@@ -4070,9 +3619,6 @@
             headMeshGroup.position.set(0, 0.142, -0.012);
             neckPivot.add(headMeshGroup);
             skeletonRig.head = headMeshGroup;
-            skeletonRig.ctHeadgear = headMeshGroup.userData.ctHeadgear;
-            skeletonRig.tHeadgear = headMeshGroup.userData.tHeadgear;
-            skeletonRig.tStubble = headMeshGroup.userData.tStubble;
 
             const fpsEyeMount = new THREE.Group();
             fpsEyeMount.position.set(0, 0.172, -0.095);
@@ -4136,21 +3682,9 @@
                 }, 'skin', false);
                 humerusMesh.position.set(0, -upperArmLen / 2, 0);
                 upperArmSeg.add(humerusMesh);
-                const upperSleeve = createLoftedAnatomicalMesh(upperArmLen + 0.012, 16, 22, (v) => {
-                    const radius = THREE.MathUtils.lerp(0.043, 0.054, v);
-                    return { rx: radius, rz: radius * 1.04 };
-                }, 'uniformFabric', true);
-                upperSleeve.position.set(0, -upperArmLen / 2, 0);
-                upperArmSeg.add(upperSleeve);
-                clothesMeshes.push(upperSleeve);
 
                 const elbowJointMesh = createMusclePart(0.040, 0.040, 0.041, 'skin', 14);
                 armGroupContainer.add(elbowJointMesh);
-                const elbowPad = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), sharedMaterials.armorPlate);
-                elbowPad.scale.set(0.043, 0.039, 0.020);
-                elbowPad.position.set(0, 0, -0.025);
-                elbowJointMesh.add(elbowPad);
-                clothesMeshes.push(elbowPad);
 
                 const forearmSeg = new THREE.Group();
                 armGroupContainer.add(forearmSeg);
@@ -4163,16 +3697,6 @@
                 }, 'skin', false);
                 forearmMesh.position.set(0, -forearmLen / 2, 0);
                 forearmSeg.add(forearmMesh);
-                const forearmSleeve = createLoftedAnatomicalMesh(forearmLen + 0.012, 16, 22, (v) => {
-                    const curve = Math.pow(v, 0.62);
-                    return {
-                        rx: THREE.MathUtils.lerp(0.033, 0.047, curve) + 0.004,
-                        rz: THREE.MathUtils.lerp(0.027, 0.045, curve) + 0.004
-                    };
-                }, 'uniformFabric', true);
-                forearmSleeve.position.set(0, -forearmLen / 2, 0);
-                forearmSeg.add(forearmSleeve);
-                clothesMeshes.push(forearmSleeve);
 
                 const wristGroup = new THREE.Group();
                 armGroupContainer.add(wristGroup);
@@ -4258,6 +3782,18 @@
               f[name].pipJoint.rotation.set(1.48, 0, 0);
               f[name].dipJoint.rotation.set(1.05, 0, 0);
             });
+                    } else if (role === 'RIGHT_INSPECT') {
+                        const grip = THREE.MathUtils.clamp(triggerPull, 0, 1);
+                        thumbBase.rotation.set(0.46 + grip * 0.22, -side * 0.18, side * 0.36);
+                        thumbDistal.rotation.set(0.30 + grip * 0.28, 0, 0);
+                        f.index.mcpJoint.rotation.set(0.24 + grip * 0.52, 0, -0.08);
+                        f.index.pipJoint.rotation.set(0.54 + grip * 0.46, 0, 0);
+                        f.index.dipJoint.rotation.set(0.34 + grip * 0.22, 0, 0);
+                        ['middle', 'ring', 'pinky'].forEach((name, idx) => {
+                            f[name].mcpJoint.rotation.set(1.18 + grip * 0.22 + idx * 0.04, 0, 0);
+                            f[name].pipJoint.rotation.set(1.32 + grip * 0.18, 0, 0);
+                            f[name].dipJoint.rotation.set(0.92 + grip * 0.12, 0, 0);
+                        });
           } else if (role === 'LEFT_CCLAMP') {
             thumbBase.rotation.set(0.35, -side * 0.25, side * 0.32);
             thumbDistal.rotation.set(0.28, 0, 0);
@@ -4267,6 +3803,15 @@
               f[name].pipJoint.rotation.set(1.35, 0, 0);
               f[name].dipJoint.rotation.set(0.92, 0, 0);
             });
+                    } else if (role === 'LEFT_INSPECT') {
+                        const grip = THREE.MathUtils.clamp(triggerPull, 0, 1);
+                        thumbBase.rotation.set(0.30 + grip * 0.32, -side * 0.15, side * 0.24);
+                        thumbDistal.rotation.set(0.20 + grip * 0.35, 0, 0);
+                        ['index', 'middle', 'ring', 'pinky'].forEach((name, idx) => {
+                            f[name].mcpJoint.rotation.set(0.32 + grip * 0.88 + idx * 0.025, 0, 0);
+                            f[name].pipJoint.rotation.set(0.52 + grip * 0.78, 0, 0);
+                            f[name].dipJoint.rotation.set(0.30 + grip * 0.58, 0, 0);
+                        });
                     } else if (role === 'LEFT_RELOAD') {
                         const grip = THREE.MathUtils.clamp(triggerPull, 0, 1);
                         thumbBase.rotation.set(0.42 + grip * 0.18, -side * 0.20, side * 0.28);
@@ -4277,41 +3822,44 @@
                             f[name].dipJoint.rotation.set(0.48 + grip * 0.34, 0, 0);
                         });
           } else if (role === 'RIGHT_KARAMBIT') {
-            thumbBase.rotation.set(0.42, -0.18, 0.48);
-            thumbDistal.rotation.set(0.35, 0, 0);
+                        const inspectGrip = THREE.MathUtils.clamp(triggerPull, 0, 1);
+                        thumbBase.rotation.set(0.42 + inspectGrip * 0.16, -0.18, 0.48 - inspectGrip * 0.14);
+                        thumbDistal.rotation.set(0.35 + inspectGrip * 0.26, 0, 0);
             
-            f.index.mcpJoint.rotation.set(1.22, 0, 0.06);
-            f.index.pipJoint.rotation.set(1.36, 0, 0);
-            f.index.dipJoint.rotation.set(0.95, 0, 0);
+                        f.index.mcpJoint.rotation.set(1.22 + inspectGrip * 0.18, 0, 0.06);
+                        f.index.pipJoint.rotation.set(1.36 + inspectGrip * 0.24, 0, 0);
+                        f.index.dipJoint.rotation.set(0.95 + inspectGrip * 0.18, 0, 0);
             
             ['middle', 'ring', 'pinky'].forEach((name, idx) => {
-              f[name].mcpJoint.rotation.set(1.44 + idx * 0.05, 0, 0);
-              f[name].pipJoint.rotation.set(1.52, 0, 0);
-              f[name].dipJoint.rotation.set(1.12, 0, 0);
+                            f[name].mcpJoint.rotation.set(1.44 + idx * 0.05 + inspectGrip * 0.12, 0, 0);
+                            f[name].pipJoint.rotation.set(1.52 + inspectGrip * 0.16, 0, 0);
+                            f[name].dipJoint.rotation.set(1.12 + inspectGrip * 0.12, 0, 0);
             });
           } else if (role === 'RIGHT_KNIFE') {
-            thumbBase.rotation.set(0.68, -side * 0.20, side * 0.58);
-            thumbDistal.rotation.set(0.45, 0, 0);
+                        const inspectGrip = THREE.MathUtils.clamp(triggerPull, 0, 1);
+                        thumbBase.rotation.set(0.68 + inspectGrip * 0.12, -side * 0.20, side * (0.58 - inspectGrip * 0.10));
+                        thumbDistal.rotation.set(0.45 + inspectGrip * 0.22, 0, 0);
             
             ['index', 'middle', 'ring', 'pinky'].forEach((name, idx) => {
-              f[name].mcpJoint.rotation.set(1.42 + idx * 0.05, 0, 0);
-              f[name].pipJoint.rotation.set(1.52, 0, 0);
-              f[name].dipJoint.rotation.set(1.15, 0, 0);
+                            f[name].mcpJoint.rotation.set(1.42 + idx * 0.05 + inspectGrip * 0.12, 0, 0);
+                            f[name].pipJoint.rotation.set(1.52 + inspectGrip * 0.18, 0, 0);
+                            f[name].dipJoint.rotation.set(1.15 + inspectGrip * 0.12, 0, 0);
             });
           } else if (role === 'LEFT_KNIFE_GUARD') {
-            thumbBase.rotation.set(0.28, 0.22, -0.38);
-            thumbDistal.rotation.set(0.24, 0, 0);
+                        const inspectGrip = THREE.MathUtils.clamp(triggerPull, 0, 1);
+                        thumbBase.rotation.set(0.28 + inspectGrip * 0.18, 0.22, -0.38 + inspectGrip * 0.12);
+                        thumbDistal.rotation.set(0.24 + inspectGrip * 0.20, 0, 0);
             
             const guardAngles = [
-              { name: 'index', mcp: 0.36, pip: 0.62, dip: 0.40, spread: 0.10 },
-              { name: 'middle', mcp: 0.44, pip: 0.68, dip: 0.44, spread: 0.02 },
-              { name: 'ring', mcp: 0.52, pip: 0.74, dip: 0.48, spread: -0.06 },
-              { name: 'pinky', mcp: 0.60, pip: 0.80, dip: 0.52, spread: -0.14 }
+                            { name: 'index', mcp: 0.36, pip: 0.62, dip: 0.40, spread: 0.10 },
+                            { name: 'middle', mcp: 0.44, pip: 0.68, dip: 0.44, spread: 0.02 },
+                            { name: 'ring', mcp: 0.52, pip: 0.74, dip: 0.48, spread: -0.06 },
+                            { name: 'pinky', mcp: 0.60, pip: 0.80, dip: 0.52, spread: -0.14 }
             ];
             guardAngles.forEach(ga => {
-              f[ga.name].mcpJoint.rotation.set(ga.mcp, 0, ga.spread);
-              f[ga.name].pipJoint.rotation.set(ga.pip, 0, 0);
-              f[ga.name].dipJoint.rotation.set(ga.dip, 0, 0);
+                            f[ga.name].mcpJoint.rotation.set(ga.mcp + inspectGrip * 0.16, 0, ga.spread);
+                            f[ga.name].pipJoint.rotation.set(ga.pip + inspectGrip * 0.20, 0, 0);
+                            f[ga.name].dipJoint.rotation.set(ga.dip + inspectGrip * 0.12, 0, 0);
             });
           }
         }
@@ -4399,39 +3947,45 @@
           
                     const activeWeapon = getActiveWeaponModel();
           
+          let inspectPose = null;
           if (state.weaponInspectTimer > 0) {
-            const ip = 1.0 - (state.weaponInspectTimer / 1.4);
-            const lookSin = Math.sin(ip * Math.PI);
-            if (state.equipped === 'KARAMBIT' && skeletonRig.karambit.userData.bladeRig) {
-              // CS2 Karambit İşaret Parmağı Halkası Etrafında Çift Tur Döndürme (Spin Inspect)
-              const spinAngle = Math.sin(ip * Math.PI * 2) * Math.PI * 2;
-              const spinQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), spinAngle);
-              skeletonRig.karambit.userData.bladeRig.quaternion.copy(skeletonRig.karambit.userData.baseBladeQuat).multiply(spinQ);
-              rotZ -= lookSin * 0.18;
-              rotY += lookSin * 0.22;
-                        } else if (state.equipped === 'BAYONET' && skeletonRig.bayonet.userData.bladeRig) {
-                            const spinAngle = Math.sin(ip * Math.PI * 2) * Math.PI * 1.5;
-                            const spinQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spinAngle);
-                            skeletonRig.bayonet.userData.bladeRig.quaternion.copy(skeletonRig.bayonet.userData.baseBladeQuat).multiply(spinQ);
-                            rotZ -= lookSin * 0.32;
-                            rotY += lookSin * 0.28;
-                        } else if (state.equipped === 'BUTTERFLY' && skeletonRig.butterfly.userData.butterflyPivots) {
-                            const flip = Math.sin(ip * Math.PI * 2);
-                            skeletonRig.butterfly.userData.butterflyPivots[0].rotation.z = flip * 1.15;
-                            skeletonRig.butterfly.userData.butterflyPivots[1].rotation.z = -flip * 1.15;
-                            rotZ -= lookSin * 0.38;
-                            rotY += Math.sin(ip * Math.PI * 2) * 0.26;
-                        } else if (state.equipped === 'TALON' && skeletonRig.talon.userData.bladeRig) {
-                            const spinAngle = Math.sin(ip * Math.PI * 2) * Math.PI * 1.2;
-                            const spinQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), spinAngle);
-                            skeletonRig.talon.userData.bladeRig.quaternion.copy(skeletonRig.talon.userData.baseBladeQuat).multiply(spinQ);
-                            rotZ -= lookSin * 0.24;
-                            rotY += lookSin * 0.18;
-            } else {
-              rotZ -= lookSin * 0.45;
-              rotY += Math.sin(ip * Math.PI * 2) * 0.32;
+            const inspectProgress = 1 - state.weaponInspectTimer / state.weaponInspectDuration;
+            inspectPose = sampleInspectProfile(state.equipped, inspectProgress);
+                        const inspectCues = state.equipped === 'BUTTERFLY' ? [0.20, 0.43, 0.67, 0.84]
+                                : state.equipped === 'KARAMBIT' ? [0.24, 0.58, 0.82]
+                                : state.equipped === 'TALON' ? [0.32, 0.70]
+                                : isKnife ? [0.36, 0.74]
+                                : state.equipped === 'AWP' ? [0.24, 0.56, 0.82]
+                                : state.equipped === 'DEAGLE' ? [0.28, 0.72]
+                                : [0.30, 0.78];
+                        while (state.inspectCueIndex < inspectCues.length && inspectProgress >= inspectCues[state.inspectCueIndex]) {
+                            const isCatch = state.inspectCueIndex === inspectCues.length - 1;
+                            playProceduralSound(isCatch ? 'inspect-catch' : 'inspect-click');
+                            state.inspectCueIndex++;
+                        }
+            rotX += inspectPose.rotX;
+            rotY += inspectPose.rotY;
+            rotZ += inspectPose.rotZ;
+            mount.position.x += inspectPose.rotZ * 0.11;
+            mount.position.y += inspectPose.grip * 0.018;
+            mount.position.z -= Math.sin(inspectProgress * Math.PI) * 0.045;
+
+                        if (activeWeapon.userData.bladeRig && activeWeapon.userData.baseBladeQuat) {
+                            activeWeapon.userData.bladeRig.quaternion.copy(activeWeapon.userData.baseBladeQuat);
+                        }
+                        if (activeWeapon.userData.butterflyPivots) {
+                            activeWeapon.userData.butterflyPivots.forEach(pivot => pivot.rotation.set(0, 0, 0));
+                        }
+                        if (inspectPose.spin && activeWeapon.userData.bladeRig) {
+              const axis = new THREE.Vector3(...inspectPose.profile.axis);
+              const spinQuaternion = new THREE.Quaternion().setFromAxisAngle(axis, inspectPose.spin);
+              activeWeapon.userData.bladeRig.quaternion.copy(activeWeapon.userData.baseBladeQuat).multiply(spinQuaternion);
             }
-                    }
+            if (inspectPose.flip && activeWeapon.userData.butterflyPivots) {
+              activeWeapon.userData.butterflyPivots[0].rotation.z = inspectPose.flip;
+              activeWeapon.userData.butterflyPivots[1].rotation.z = -inspectPose.flip;
+            }
+          }
                     if (state.weaponInspectTimer <= 0) {
                         ['bayonet', 'karambit', 'butterfly', 'talon'].forEach(name => {
                             const weapon = skeletonRig[name];
@@ -4481,22 +4035,26 @@
                             const chargingHandle = rifleData.chargingHandle;
                             if (chargingHandle) {
                                 const rack = THREE.MathUtils.smoothstep(progress, 0.82, 0.88) * (1 - THREE.MathUtils.smoothstep(progress, 0.92, 0.99));
-                                chargingHandle.position.z = -0.095 - rack * 0.042;
+                                chargingHandle.position.z = (rifleData.fireCycleRest ?? -0.095) - rack * 0.042;
                             }
-                        } else if (rifleData.chargingHandle) {
-                            const inspect = state.weaponInspectTimer > 0
-                                ? Math.sin((1 - state.weaponInspectTimer / 1.4) * Math.PI)
-                                : 0;
-                            rifleData.chargingHandle.position.z = -0.095 - inspect * 0.035;
                         }
                     }
 
                     const fireCyclePart = rifleData.fireCyclePart;
-                    if (fireCyclePart && !state.isReloading) {
-                        const cycleDuration = rifleData.fireCycleDuration || 0.16;
-                        const cycleProgress = 1 - THREE.MathUtils.clamp(state.weaponCycleTimer / cycleDuration, 0, 1);
-                        const cycleImpulse = Math.sin(cycleProgress * Math.PI);
-                        fireCyclePart.position[rifleData.fireCycleAxis || 'z'] = rifleData.fireCycleRest + (rifleData.fireCycleOffset || 0) * cycleImpulse;
+                    if (fireCyclePart) {
+                        const cycleAxis = rifleData.fireCycleAxis || 'z';
+                        const reloadOwnsMechanism = state.isReloading && fireCyclePart === rifleData.chargingHandle;
+                        if (!reloadOwnsMechanism && !state.isReloading && state.weaponCycleTimer > 0) {
+                            const cycleDuration = rifleData.fireCycleDuration || 0.16;
+                            const cycleProgress = 1 - THREE.MathUtils.clamp(state.weaponCycleTimer / cycleDuration, 0, 1);
+                            const cycleImpulse = Math.sin(cycleProgress * Math.PI);
+                            fireCyclePart.position[cycleAxis] = rifleData.fireCycleRest + (rifleData.fireCycleOffset || 0) * cycleImpulse;
+                        } else if (!reloadOwnsMechanism && !state.isReloading && fireCyclePart === rifleData.chargingHandle && state.weaponInspectTimer > 0) {
+                            const inspectPull = Math.sin((1 - state.weaponInspectTimer / state.weaponInspectDuration) * Math.PI);
+                            fireCyclePart.position[cycleAxis] = rifleData.fireCycleRest + (rifleData.fireCycleOffset || -0.035) * 0.5 * inspectPull;
+                        } else if (!reloadOwnsMechanism) {
+                            fireCyclePart.position[cycleAxis] = rifleData.fireCycleRest;
+                        }
                     }
           
           const invContainerMat = new THREE.Matrix4().copy(skeletonRig.armsContainer.matrixWorld).invert();
@@ -4574,13 +4132,19 @@
           skeletonRig.leftWristGroup.quaternion.copy(leftGripQuat);
           
           const rightHandRole = !isKnife ? 'RIGHT_RIFLE' : (state.equipped === 'KARAMBIT' ? 'RIGHT_KARAMBIT' : 'RIGHT_KNIFE');
-          poseHandForWeapon(skeletonRig.rightHand, 1, rightHandRole, state.recoilKick);
+          const inspectGrip = inspectPose ? inspectPose.grip : 0;
+          const firearmInspect = Boolean(inspectPose && !isKnife);
+          const knifeInspect = Boolean(inspectPose && isKnife);
+          const activeRightHandRole = firearmInspect ? 'RIGHT_INSPECT' : rightHandRole;
+          const rightHandGrip = knifeInspect ? inspectGrip : (firearmInspect ? inspectGrip : state.recoilKick);
+          poseHandForWeapon(skeletonRig.rightHand, 1, activeRightHandRole, rightHandGrip);
           const reloadProgress = THREE.MathUtils.clamp(state.reloadProgress, 0, 1);
           const removeGrip = THREE.MathUtils.smoothstep(reloadProgress, 0.08, 0.22) * (1 - THREE.MathUtils.smoothstep(reloadProgress, 0.34, 0.46));
           const insertGrip = THREE.MathUtils.smoothstep(reloadProgress, 0.46, 0.60) * (1 - THREE.MathUtils.smoothstep(reloadProgress, 0.78, 0.92));
           const reloadGrip = state.isReloading ? Math.max(removeGrip, insertGrip) : 0;
-          const leftHandRole = isKnife ? 'LEFT_KNIFE_GUARD' : (state.isReloading ? 'LEFT_RELOAD' : 'LEFT_CCLAMP');
-          poseHandForWeapon(skeletonRig.leftHand, -1, leftHandRole, reloadGrip);
+          const leftHandRole = isKnife ? 'LEFT_KNIFE_GUARD' : (firearmInspect ? 'LEFT_INSPECT' : (state.isReloading ? 'LEFT_RELOAD' : 'LEFT_CCLAMP'));
+          const leftHandGrip = knifeInspect || firearmInspect ? inspectGrip : reloadGrip;
+          poseHandForWeapon(skeletonRig.leftHand, -1, leftHandRole, leftHandGrip);
           
                     const activeFirearm = getActiveFirearmModel();
                     if (activeFirearm.userData.triggerShoe) {
@@ -4606,7 +4170,6 @@
                 gCtx.beginPath(); gCtx.moveTo(0, i); gCtx.lineTo(512, i); gCtx.stroke();
             }
             const floorTex = new THREE.CanvasTexture(gridCanvas);
-            floorTex.encoding = THREE.sRGBEncoding;
             floorTex.wrapS = THREE.RepeatWrapping;
             floorTex.wrapT = THREE.RepeatWrapping;
             floorTex.repeat.set(70, 70);
@@ -4778,6 +4341,8 @@
             mouseADS = false;
             state.equipTransition = 1.0;
             state.weaponCycleTimer = 0;
+            state.weaponInspectTimer = 0;
+            state.inspectCueIndex = 0;
             document.getElementById('btn-touch-ads').classList.remove('pressed');
             weaponTypes.forEach(weaponType => {
                 const model = skeletonRig[weaponType.toLowerCase()];
@@ -4820,6 +4385,7 @@
             if (state.isReloading || state.ammo >= getMagazineCapacity() || state.reserveAmmo <= 0 || isKnifeType()) return;
             state.isReloading = true;
             state.reloadProgress = 0;
+            state.weaponCycleTimer = 0;
             state.isADS = false;
             mouseADS = false;
             document.getElementById('btn-touch-ads').classList.remove('pressed');
@@ -4837,8 +4403,12 @@
         }
 
         function triggerInspectWeapon() {
-            state.weaponInspectTimer = 1.4;
-            playProceduralSound('slash');
+            const profile = weaponInspectProfiles[state.equipped] || weaponInspectProfiles.RIFLE;
+            state.knifeSlashTimer = 0;
+            state.weaponInspectDuration = profile.duration;
+            state.weaponInspectTimer = profile.duration;
+            state.inspectCueIndex = 0;
+            playProceduralSound(isKnifeType() ? 'slash' : 'inspect-click');
         }
 
         function triggerReloadOrInspect() {
@@ -4901,34 +4471,6 @@
             skinMeshes.forEach(m => m.material = bodyMat);
             gloveMeshes.forEach(m => m.visible = (mode === 'GLOVED'));
             clothesMeshes.forEach(m => m.visible = (mode !== 'ECORCHE'));
-            if (skeletonRig.ctHeadgear) skeletonRig.ctHeadgear.visible = state.faction === 'CT' && mode !== 'ECORCHE';
-            if (skeletonRig.tHeadgear) skeletonRig.tHeadgear.visible = state.faction === 'T' && mode !== 'ECORCHE';
-            if (skeletonRig.tStubble) skeletonRig.tStubble.visible = state.faction === 'T' && mode !== 'ECORCHE';
-        }
-
-        function setTeamFaction(faction) {
-            if (faction !== 'CT' && faction !== 'T') return;
-            state.faction = faction;
-            const uniformMap = uniformTextures[faction];
-            [sharedMaterials.shorts, sharedMaterials.uniformFabric, sharedMaterials.uniformShade, sharedMaterials.plateCarrier].forEach(material => {
-                material.map = uniformMap;
-                material.needsUpdate = true;
-            });
-            const isCT = faction === 'CT';
-            sharedMaterials.uniformShade.color.set(isCT ? 0xa7b4ac : 0xb9a57e);
-            sharedMaterials.plateCarrier.color.set(isCT ? 0xd8ded9 : 0xd7c39b);
-            sharedMaterials.webbing.color.set(isCT ? 0x65716c : 0x84704a);
-            sharedMaterials.helmetShell.color.set(isCT ? 0x89938a : 0x77714f);
-            if (skeletonRig.ctHeadgear) skeletonRig.ctHeadgear.visible = isCT && state.skinMode !== 'ECORCHE';
-            if (skeletonRig.tHeadgear) skeletonRig.tHeadgear.visible = !isCT && state.skinMode !== 'ECORCHE';
-            if (skeletonRig.tStubble) skeletonRig.tStubble.visible = !isCT && state.skinMode !== 'ECORCHE';
-            const factionLabel = document.getElementById('operator-faction-label');
-            if (factionLabel) factionLabel.textContent = isCT ? 'CT · ÖZEL TİM' : 'T · SAHA OPERATÖRÜ';
-            ['CT', 'T'].forEach(team => {
-                const button = document.getElementById(`btn-faction-${team.toLowerCase()}`);
-                button.classList.toggle('active', faction === team);
-                button.setAttribute('aria-pressed', String(faction === team));
-            });
         }
 
         function setWeaponSkinTheme(theme) {
@@ -5461,38 +5003,24 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.outputEncoding = THREE.sRGBEncoding;
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.15;
             container.appendChild(renderer.domElement);
 
-            scene.add(new THREE.HemisphereLight(0xe8eee0, 0x171e19, 0.72));
+            scene.add(new THREE.HemisphereLight(0xe0f2fe, 0x1e293b, 0.90));
 
-            const keyLight = new THREE.DirectionalLight(0xfff4df, 1.55);
+            const keyLight = new THREE.DirectionalLight(0xfffbeb, 1.32);
             keyLight.position.set(6, 14, 9);
             keyLight.castShadow = true;
             keyLight.shadow.mapSize.width = 2048;
             keyLight.shadow.mapSize.height = 2048;
-            keyLight.shadow.camera.left = -10;
-            keyLight.shadow.camera.right = 10;
-            keyLight.shadow.camera.top = 10;
-            keyLight.shadow.camera.bottom = -10;
-            keyLight.shadow.bias = -0.00025;
             scene.add(keyLight);
 
-            const rimLight = new THREE.DirectionalLight(0x9dc9bd, 0.72);
+            const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.55);
             rimLight.position.set(-7, 6, -8);
             scene.add(rimLight);
-
-            const fillLight = new THREE.DirectionalLight(0xc6d3b8, 0.34);
-            fillLight.position.set(-5, 4, 7);
-            scene.add(fillLight);
-
-            const warmBounce = new THREE.PointLight(0xffc88c, 0.42, 18);
-            warmBounce.position.set(2.5, 2.8, 1.5);
-            scene.add(warmBounce);
 
             const textures = createAnatomicalAndWeaponTextures();
             initMaterials(textures);
