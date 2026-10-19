@@ -430,7 +430,7 @@
             <div class="text-center">
                 <div class="text-[8px] uppercase tracking-wider text-slate-400">MERMİ</div>
                 <div class="mono text-xs sm:text-base font-extrabold text-white leading-none">
-                    <span id="ammo-current" class="text-sky-400">35</span><span class="text-slate-500 text-[10px]"> / 200</span>
+                    <span id="ammo-current" class="text-sky-400">35</span><span class="text-slate-500 text-[10px]"> / <span id="ammo-reserve">200</span></span>
                 </div>
             </div>
             <div class="h-5 w-px bg-slate-700/80"></div>
@@ -514,6 +514,7 @@
             isReloading: false,
             reloadProgress: 0,
             ammo: 35,
+            reserveAmmo: 200,
             hitsCount: 0,
             laserOn: true,
             lastShotTime: 0,
@@ -530,6 +531,7 @@
         let lookPrevPos = { x: 0, y: 0 };
         let joyCenter = { x: 0, y: 0 };
         let audioCtx = null;
+        let mouseADS = false;
 
         function playProceduralSound(type) {
             try {
@@ -619,6 +621,16 @@
             } catch (e) {}
         }
 
+        function appendGeminiMessage(className, text) {
+            const logEl = document.getElementById('gemini-chat-log');
+            const message = document.createElement('div');
+            message.className = className;
+            message.textContent = text;
+            logEl.appendChild(message);
+            logEl.scrollTop = logEl.scrollHeight;
+            return message;
+        }
+
         async function sendGeminiPrompt() {
             const inputEl = document.getElementById('gemini-prompt-input');
             const logEl = document.getElementById('gemini-chat-log');
@@ -626,8 +638,14 @@
             if (!prompt) return;
 
             inputEl.value = '';
-            logEl.innerHTML += `<div class="text-sky-300 font-semibold">[OPERATÖR]: ${prompt}</div>`;
+            appendGeminiMessage('text-sky-300 font-semibold', `[OPERATÖR]: ${prompt}`);
             logEl.scrollTop = logEl.scrollHeight;
+
+            const apiKey = window.GEMINI_API_KEY;
+            if (!apiKey) {
+                appendGeminiMessage('text-red-400', '[AI KOMUTAN]: AI hizmeti yapılandırılmamış.');
+                return;
+            }
 
             const systemPrompt = "Sen kıdemli bir taktiksel operasyon, CS2 silah/bıçak koleksiyoneri ve anatomik biyomekanik komutanısın. Oyuncuya M4A1 SOPMOD C-Clamp tutuşu, CS2 Metalik Karambit / M9 Bayonet bıçak kaplamaları (Fade, Doppler, Case Hardened Blue Gem, Dragon Lore) ve özel eldiven kombinasyonları konusunda kısa, net ve profesyonel tavsiyeler veriyorsun.";
             const payload = {
@@ -635,29 +653,29 @@
                 systemInstruction: { parts: [{ text: systemPrompt }] }
             };
 
-            const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            let statusMessage;
 
             try {
-                logEl.innerHTML += `<div class="text-amber-300 animate-pulse">[AI KOMUTAN]: Taktik analiz yapılıyor...</div>`;
-                logEl.scrollTop = logEl.scrollHeight;
+                statusMessage = appendGeminiMessage('text-amber-300 animate-pulse', '[AI KOMUTAN]: Taktik analiz yapılıyor...');
 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                if (!response.ok) throw new Error(`Gemini API HTTP ${response.status}`);
                 const result = await response.json();
                 const reply = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                logEl.lastChild.remove();
+                statusMessage.remove();
                 if (reply) {
-                    logEl.innerHTML += `<div class="text-emerald-300 font-medium">[AI KOMUTAN]: ${reply}</div>`;
+                    appendGeminiMessage('text-emerald-300 font-medium', `[AI KOMUTAN]: ${reply}`);
                 } else {
-                    logEl.innerHTML += `<div class="text-red-400">[AI KOMUTAN]: İletişim paraziti oluştu.</div>`;
+                    appendGeminiMessage('text-red-400', '[AI KOMUTAN]: İletişim paraziti oluştu.');
                 }
             } catch (err) {
-                if (logEl.lastChild) logEl.lastChild.remove();
-                logEl.innerHTML += `<div class="text-red-400">[AI KOMUTAN]: Sinyal hatası.</div>`;
+                if (statusMessage && statusMessage.isConnected) statusMessage.remove();
+                appendGeminiMessage('text-red-400', '[AI KOMUTAN]: Sinyal hatası.');
             }
             logEl.scrollTop = logEl.scrollHeight;
         }
@@ -1748,6 +1766,7 @@
             const chargingHandle = new THREE.Mesh(new THREE.BoxGeometry(0.060, 0.012, 0.030), sharedMaterials.gunAccentNeon);
             chargingHandle.position.set(0, 0.053, -0.095);
             gunCore.add(chargingHandle);
+            gun.userData.chargingHandle = chargingHandle;
 
             // Picatinny Üst Ray Sistemi
             const topRail = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.010, 0.50), sharedMaterials.gunPolymer);
@@ -1862,7 +1881,15 @@
             topRound.position.set(0, 0.076, 0.004);
             magGroup.add(magBody, magBase, topRound);
             gunCore.add(magGroup);
-            gun.userData.magGroup = magGroup;
+            magGroup.userData.reloadHome = magGroup.position.clone();
+            magGroup.userData.reloadHomeRotation = magGroup.rotation.clone();
+            const spareMagGroup = magGroup.clone(true);
+            spareMagGroup.userData.reloadHome = spareMagGroup.position.clone();
+            spareMagGroup.userData.reloadHomeRotation = spareMagGroup.rotation.clone();
+            spareMagGroup.visible = false;
+            gunCore.add(spareMagGroup);
+            gun.userData.magazineGroups = [magGroup, spareMagGroup];
+            gun.userData.loadedMagazineIndex = 0;
 
             // M-LOK Sekizgen Metalik El Kundağı ve Soğutma Delikleri
             const handguard = new THREE.Mesh(new THREE.CylinderGeometry(0.0265, 0.0265, 0.285, 8), sharedMaterials.gunFDE);
@@ -2650,6 +2677,12 @@
               skeletonRig.karambit.userData.bladeRig.quaternion.copy(skeletonRig.karambit.userData.baseBladeQuat).multiply(spinQ);
               rotZ -= lookSin * 0.18;
               rotY += lookSin * 0.22;
+                        } else if (state.equipped === 'BAYONET' && skeletonRig.bayonet.userData.bladeRig) {
+                            const spinAngle = Math.sin(ip * Math.PI * 2) * Math.PI * 1.5;
+                            const spinQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), spinAngle);
+                            skeletonRig.bayonet.userData.bladeRig.quaternion.copy(skeletonRig.bayonet.userData.baseBladeQuat).multiply(spinQ);
+                            rotZ -= lookSin * 0.32;
+                            rotY += lookSin * 0.28;
             } else {
               rotZ -= lookSin * 0.45;
               rotY += Math.sin(ip * Math.PI * 2) * 0.32;
@@ -2657,20 +2690,56 @@
           } else if (skeletonRig.karambit && skeletonRig.karambit.userData.bladeRig && skeletonRig.karambit.userData.baseBladeQuat) {
             skeletonRig.karambit.userData.bladeRig.quaternion.copy(skeletonRig.karambit.userData.baseBladeQuat);
           }
+                    if (state.weaponInspectTimer <= 0 && skeletonRig.bayonet && skeletonRig.bayonet.userData.bladeRig && skeletonRig.bayonet.userData.baseBladeQuat) {
+                        skeletonRig.bayonet.userData.bladeRig.quaternion.copy(skeletonRig.bayonet.userData.baseBladeQuat);
+                    }
           
           mount.rotation.set(rotX, rotY, rotZ);
           mount.updateMatrixWorld(true);
           
-          const magGroup = skeletonRig.rifle.userData.magGroup;
-          if (magGroup) {
-            if (state.isReloading && !isKnife) {
-              const magOut = Math.sin(state.reloadProgress * Math.PI);
-              magGroup.position.y = -0.092 - magOut * 0.15;
-              magGroup.position.x = magOut * 0.035;
-            } else {
-              magGroup.position.set(0, -0.092, 0.058);
-            }
-          }
+                    const rifleData = skeletonRig.rifle.userData;
+                    const magazineGroups = rifleData.magazineGroups;
+                    if (magazineGroups && magazineGroups.length === 2) {
+                        const loadedIndex = rifleData.loadedMagazineIndex;
+                        const loadedMag = magazineGroups[loadedIndex];
+                        const spareMag = magazineGroups[1 - loadedIndex];
+                        const loadedHome = loadedMag.userData.reloadHome;
+                        const spareHome = spareMag.userData.reloadHome;
+                        loadedMag.position.copy(loadedHome);
+                        loadedMag.rotation.copy(loadedMag.userData.reloadHomeRotation);
+                        spareMag.position.copy(spareHome);
+                        spareMag.rotation.copy(spareMag.userData.reloadHomeRotation);
+                        loadedMag.visible = true;
+                        spareMag.visible = false;
+
+                        if (state.isReloading && !isKnife) {
+                            const progress = THREE.MathUtils.clamp(state.reloadProgress, 0, 1);
+                            const eject = THREE.MathUtils.smoothstep(progress, 0.18, 0.46);
+                            const insert = THREE.MathUtils.smoothstep(progress, 0.48, 0.76);
+                            const ejectEnd = loadedHome.clone().add(new THREE.Vector3(0.055, -0.19, 0.025));
+                            const spareStart = spareHome.clone().add(new THREE.Vector3(0.10, -0.30, 0.14));
+
+                            loadedMag.position.lerpVectors(loadedHome, ejectEnd, eject);
+                            loadedMag.rotation.z -= eject * 0.78;
+                            loadedMag.visible = progress < 0.46;
+
+                            spareMag.visible = progress >= 0.42;
+                            spareMag.position.lerpVectors(spareStart, spareHome, insert);
+                            spareMag.rotation.z += (1 - insert) * 0.38;
+                            spareMag.position.y -= Math.sin(THREE.MathUtils.smoothstep(progress, 0.74, 0.86) * Math.PI) * 0.018;
+
+                            const chargingHandle = rifleData.chargingHandle;
+                            if (chargingHandle) {
+                                const rack = THREE.MathUtils.smoothstep(progress, 0.82, 0.88) * (1 - THREE.MathUtils.smoothstep(progress, 0.92, 0.99));
+                                chargingHandle.position.z = -0.095 - rack * 0.042;
+                            }
+                        } else if (rifleData.chargingHandle) {
+                            const inspect = state.equipped === 'RIFLE' && state.weaponInspectTimer > 0
+                                ? Math.sin((1 - state.weaponInspectTimer / 1.4) * Math.PI)
+                                : 0;
+                            rifleData.chargingHandle.position.z = -0.095 - inspect * 0.035;
+                        }
+                    }
           
           const invContainerMat = new THREE.Matrix4().copy(skeletonRig.armsContainer.matrixWorld).invert();
           
@@ -2696,10 +2765,13 @@
           leftAnchorLocalMat.decompose(leftGripPos, leftGripQuat, dummyScale);
           
           if (state.isReloading && !isKnife) {
-            const rSin = Math.sin(state.reloadProgress * Math.PI);
-            leftGripPos.y -= rSin * 0.12;
-            leftGripPos.z += rSin * 0.14;
-            leftGripPos.x += rSin * 0.04;
+                        const progress = THREE.MathUtils.clamp(state.reloadProgress, 0, 1);
+                        const removeMag = THREE.MathUtils.smoothstep(progress, 0.14, 0.34) * (1 - THREE.MathUtils.smoothstep(progress, 0.38, 0.48));
+                        const grabSpare = THREE.MathUtils.smoothstep(progress, 0.42, 0.58) * (1 - THREE.MathUtils.smoothstep(progress, 0.72, 0.88));
+                        const seatMag = THREE.MathUtils.smoothstep(progress, 0.62, 0.78) * (1 - THREE.MathUtils.smoothstep(progress, 0.80, 0.91));
+                        leftGripPos.y -= removeMag * 0.10 + grabSpare * 0.065 + seatMag * 0.085;
+                        leftGripPos.z += removeMag * 0.13 + grabSpare * 0.09 + seatMag * 0.12;
+                        leftGripPos.x += removeMag * 0.035 - grabSpare * 0.04 - seatMag * 0.025;
           }
           
           if (isKnife) {
@@ -2919,7 +2991,9 @@
         function equipWeapon(type) {
             state.equipped = type;
             state.isADS = false;
+            mouseADS = false;
             state.equipTransition = 1.0;
+            document.getElementById('btn-touch-ads').classList.remove('pressed');
 
             if (skeletonRig.rifle) skeletonRig.rifle.visible = (type === 'RIFLE');
             if (skeletonRig.bayonet) skeletonRig.bayonet.visible = (type === 'BAYONET');
@@ -2949,10 +3023,21 @@
         }
 
         function triggerReload() {
-            if (state.isReloading || state.ammo === 35 || state.equipped !== 'RIFLE') return;
+            if (state.isReloading || state.ammo === 35 || state.reserveAmmo <= 0 || state.equipped !== 'RIFLE') return;
             state.isReloading = true;
             state.reloadProgress = 0;
             state.isADS = false;
+            mouseADS = false;
+            document.getElementById('btn-touch-ads').classList.remove('pressed');
+            document.getElementById('ads-indicator').textContent = 'C-Clamp Çift El IK';
+            const magazineGroups = skeletonRig.rifle && skeletonRig.rifle.userData.magazineGroups;
+            if (magazineGroups) {
+                magazineGroups.forEach((mag, index) => {
+                    mag.position.copy(mag.userData.reloadHome);
+                    mag.rotation.copy(mag.userData.reloadHomeRotation);
+                    mag.visible = index === skeletonRig.rifle.userData.loadedMagazineIndex;
+                });
+            }
             playProceduralSound('reload');
         }
 
@@ -3158,6 +3243,7 @@
             const fireBtn = document.getElementById('btn-touch-fire');
             fireBtn.addEventListener('pointerdown', (e) => {
                 e.stopPropagation();
+                fireBtn.setPointerCapture(e.pointerId);
                 state.isFiringHeld = true;
                 fireWeapon(false);
             });
@@ -3180,6 +3266,15 @@
                 lookPointerId = e.pointerId;
                 lookPrevPos.x = e.clientX;
                 lookPrevPos.y = e.clientY;
+                if (e.pointerType === 'mouse' && e.button === 0) {
+                    state.isFiringHeld = true;
+                    fireWeapon(false);
+                } else if (e.pointerType === 'mouse' && e.button === 2 && state.equipped === 'RIFLE') {
+                    mouseADS = true;
+                    state.isADS = true;
+                    document.getElementById('ads-indicator').textContent = 'Holografik Nişan (ADS)';
+                    document.getElementById('btn-touch-ads').classList.add('pressed');
+                }
             });
             window.addEventListener('pointermove', (e) => {
                 if (e.pointerId === lookPointerId) {
@@ -3198,7 +3293,15 @@
             });
             window.addEventListener('pointerup', (e) => {
                 if (e.pointerId === lookPointerId) lookPointerId = null;
+                if (e.pointerType === 'mouse' && e.button === 0) state.isFiringHeld = false;
+                if (e.pointerType === 'mouse' && e.button === 2 && mouseADS) {
+                    mouseADS = false;
+                    state.isADS = false;
+                    document.getElementById('ads-indicator').textContent = 'C-Clamp Çift El IK';
+                    document.getElementById('btn-touch-ads').classList.remove('pressed');
+                }
             });
+            container.addEventListener('contextmenu', (e) => e.preventDefault());
 
             window.addEventListener('wheel', (e) => {
                 if (state.cameraMode === 'INSPECT') {
@@ -3222,7 +3325,10 @@
                 if (k === 'f') triggerInspectWeapon();
                 if (k === 'l') toggleLaserSight();
                 if (k === 'c') toggleCrouch();
-                if (k === ' ') triggerJump();
+                if (k === ' ') {
+                    e.preventDefault();
+                    triggerJump();
+                }
                 if (k === 'v') {
                     setCameraMode(state.cameraMode === 'FPS' ? 'TPS' : (state.cameraMode === 'TPS' ? 'INSPECT' : 'FPS'));
                 }
@@ -3234,6 +3340,20 @@
                 if (k === 'a') state.keys.a = false;
                 if (k === 'd') state.keys.d = false;
                 if (k === 'shift') state.keys.shift = false;
+            });
+
+            window.addEventListener('blur', () => {
+                state.keys = { w: false, a: false, s: false, d: false, shift: false };
+                state.joyMove.x = 0;
+                state.joyMove.y = 0;
+                joystickPointerId = null;
+                lookPointerId = null;
+                joyKnob.style.transform = 'translate3d(0px, 0px, 0px)';
+                state.isFiringHeld = false;
+                mouseADS = false;
+                state.isADS = false;
+                document.getElementById('btn-touch-ads').classList.remove('pressed');
+                if (state.equipped === 'RIFLE') document.getElementById('ads-indicator').textContent = 'C-Clamp Çift El IK';
             });
 
             window.addEventListener('resize', () => {
@@ -3261,8 +3381,21 @@
                 if (state.reloadProgress >= 1.0) {
                     state.isReloading = false;
                     state.reloadProgress = 0;
-                    state.ammo = 35;
-                    document.getElementById('ammo-current').textContent = 35;
+                    const ammoToLoad = Math.min(35 - state.ammo, state.reserveAmmo);
+                    state.ammo += ammoToLoad;
+                    state.reserveAmmo -= ammoToLoad;
+                    const rifleData = skeletonRig.rifle.userData;
+                    const magazineGroups = rifleData.magazineGroups;
+                    if (magazineGroups && magazineGroups.length === 2) {
+                        const nextIndex = 1 - rifleData.loadedMagazineIndex;
+                        magazineGroups[rifleData.loadedMagazineIndex].visible = false;
+                        magazineGroups[nextIndex].position.copy(magazineGroups[nextIndex].userData.reloadHome);
+                        magazineGroups[nextIndex].rotation.copy(magazineGroups[nextIndex].userData.reloadHomeRotation);
+                        magazineGroups[nextIndex].visible = true;
+                        rifleData.loadedMagazineIndex = nextIndex;
+                    }
+                    document.getElementById('ammo-current').textContent = state.ammo;
+                    document.getElementById('ammo-reserve').textContent = state.reserveAmmo;
                 }
             }
 
@@ -3487,22 +3620,10 @@
             buildTacticalEnvironment();
             setupInputHandlers();
 
-            setCameraMode('FPS / TPS & CS2 Karambit');
+            setCameraMode('FPS');
             updateAdaptiveProjection();
             animate();
         };
-    </script>
-</body>
-</html>
-<!-- === TÜM DEVAM PARÇALARI TAMAMLANDI === -->
-
-        // === DEVAM PARÇA 4/5 SONU ===
-
-        // === DEVAM PARÇA 3/5 SONU ===
-
-        // === DEVAM PARÇA 2/5 SONU ===
-        // === DEVAM PARÇA 1/5 SONU ===
-        // --- BÖLÜM 1 SONU: 2. Parçada Tam Boy İnsan Anatomisi, IK Çözücü, CS2 Skin/Eldiven Değiştiriciler ve Oyun Döngüsü eklenecektir ---
     </script>
 </body>
 </html>
