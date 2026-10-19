@@ -270,7 +270,7 @@
 
         <!-- Silah ve Bıçak Seçimi -->
         <div class="text-[10px] text-slate-300 font-bold flex items-center justify-between">
-            <span>⚔️ Silah & Metalik Bıçak Seçimi (1-2-3 / Q):</span>
+            <span>⚔️ Silah & Metalik Bıçak Seçimi (1-6 / Q):</span>
             <button onclick="triggerInspectWeapon()" class="text-[9px] mono bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded border border-sky-500/40 hover:bg-sky-500/30">
                 🔄 F: Parmakta Çevir / İncele
             </button>
@@ -285,11 +285,20 @@
             <button id="btn-equip-karambit" onclick="equipWeapon('KARAMBIT')" class="hud-btn px-2 py-2 rounded-lg text-[10px] font-bold border border-slate-700/80 text-slate-200 flex flex-col items-center gap-0.5">
                 <span class="text-sm">🌙</span> <span>CS2 Karambit</span>
             </button>
+            <button id="btn-equip-ak47" onclick="equipWeapon('AK47')" class="hud-btn px-2 py-2 rounded-lg text-[10px] font-bold border border-slate-700/80 text-slate-200 flex flex-col items-center gap-0.5">
+                <span class="text-sm">🪵</span> <span>AK-47</span>
+            </button>
+            <button id="btn-equip-butterfly" onclick="equipWeapon('BUTTERFLY')" class="hud-btn px-2 py-2 rounded-lg text-[10px] font-bold border border-slate-700/80 text-slate-200 flex flex-col items-center gap-0.5">
+                <span class="text-sm">🦋</span> <span>Butterfly</span>
+            </button>
+            <button id="btn-equip-talon" onclick="equipWeapon('TALON')" class="hud-btn px-2 py-2 rounded-lg text-[10px] font-bold border border-slate-700/80 text-slate-200 flex flex-col items-center gap-0.5">
+                <span class="text-sm">🪝</span> <span>Talon</span>
+            </button>
         </div>
 
-        <!-- CS2 Metalik & Özel Kaplama Desenleri (8 Çeşit) -->
+        <!-- CS2 Metalik & Özel Kaplama Desenleri (12 Çeşit) -->
         <div class="text-[10px] text-pink-400 font-bold pt-1 flex items-center justify-between">
-            <span>✨ CS2 Metalik & Özel Kaplama Desenleri (8 Skin):</span>
+            <span>✨ CS2 Metalik & Özel Kaplama Desenleri (12 Skin):</span>
             <span class="text-[9px] mono bg-pink-500/20 text-pink-300 px-1.5 py-0.5 rounded">FACTORY NEW</span>
         </div>
         <div class="grid grid-cols-4 gap-1.5">
@@ -317,11 +326,23 @@
             <button id="btn-camo-mecha" onclick="setWeaponSkinTheme('MECHA')" class="skin-btn px-1.5 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #3b0764, #a3e635, #facc15);">
                 ⚡ Eva-Mecha
             </button>
+            <button id="btn-camo-neonrider" onclick="setWeaponSkinTheme('NEONRIDER')" class="skin-btn px-1.5 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #111827, #ec4899, #22d3ee);">
+                🌃 Neon Rider
+            </button>
+            <button id="btn-camo-carbon" onclick="setWeaponSkinTheme('CARBON')" class="skin-btn px-1.5 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #111827, #64748b, #0f172a);">
+                🕸 Carbon Fiber
+            </button>
+            <button id="btn-camo-emerald" onclick="setWeaponSkinTheme('EMERALD')" class="skin-btn px-1.5 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #064e3b, #34d399, #d1fae5);">
+                💚 Emerald
+            </button>
+            <button id="btn-camo-arctic" onclick="setWeaponSkinTheme('ARCTIC')" class="skin-btn px-1.5 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-slate-900 text-center" style="background: linear-gradient(135deg, #f8fafc, #bae6fd, #64748b);">
+                ❄ Arctic Camo
+            </button>
         </div>
 
-        <!-- CS2 Özel Eldiven Modelleri (6 Çeşit) -->
+        <!-- CS2 Özel Eldiven Modelleri (12 Çeşit) -->
         <div class="text-[10px] text-sky-400 font-bold pt-1 flex items-center justify-between">
-            <span>🧤 CS2 Özel Taktik & Spor Eldivenler (6 Desen):</span>
+            <span>🧤 CS2 Özel Taktik & Spor Eldivenler (12 Desen):</span>
             <span class="text-[9px] mono bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">CS2 GLOVES</span>
         </div>
         <div class="grid grid-cols-3 gap-1.5">
@@ -342,6 +363,24 @@
             </button>
             <button id="btn-glove-tactical" onclick="setGloveSkinTheme('TACTICAL')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-slate-200 text-center" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
                 🪖 Siyah Karbon
+            </button>
+            <button id="btn-glove-diamondback" onclick="setGloveSkinTheme('DIAMONDBACK')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #14532d, #84cc16, #052e16);">
+                🐍 Diamondback
+            </button>
+            <button id="btn-glove-mogul" onclick="setGloveSkinTheme('MOGUL')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #0c4a6e, #38bdf8, #f8fafc);">
+                🏔 Mogul
+            </button>
+            <button id="btn-glove-cobalt" onclick="setGloveSkinTheme('COBALT')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #172554, #2563eb, #0f172a);">
+                ☠ Cobalt Skull
+            </button>
+            <button id="btn-glove-arid" onclick="setGloveSkinTheme('ARID')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-slate-900 text-center" style="background: linear-gradient(135deg, #d6b36a, #6b5b3e, #e8d7a8);">
+                🏜 Arid
+            </button>
+            <button id="btn-glove-omega" onclick="setGloveSkinTheme('OMEGA')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-slate-950 text-center" style="background: linear-gradient(135deg, #f97316, #facc15, #111827);">
+                ⚡ Omega
+            </button>
+            <button id="btn-glove-slingshot" onclick="setGloveSkinTheme('SLINGSHOT')" class="glove-btn px-2 py-1.5 rounded-lg text-[9px] font-bold border border-slate-700 text-white text-center" style="background: linear-gradient(135deg, #7f1d1d, #ef4444, #171717);">
+                🔥 Slingshot
             </button>
         </div>
 
@@ -532,6 +571,18 @@
         let joyCenter = { x: 0, y: 0 };
         let audioCtx = null;
         let mouseADS = false;
+
+        function isKnifeType(type = state.equipped) {
+            return ['BAYONET', 'KARAMBIT', 'BUTTERFLY', 'TALON'].includes(type);
+        }
+
+        function getActiveWeaponModel() {
+            return skeletonRig[state.equipped.toLowerCase()];
+        }
+
+        function getActiveFirearmModel() {
+            return state.equipped === 'AK47' ? skeletonRig.ak47 : skeletonRig.rifle;
+        }
 
         function playProceduralSound(type) {
             try {
@@ -904,6 +955,72 @@
                 ctx.font = '900 48px Inter, sans-serif';
                 ctx.fillText('鬼神 // KITSUNE-09', 78, 535);
 
+            } else if (theme === 'NEONRIDER') {
+                const g = ctx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#111827');
+                g.addColorStop(0.48, '#312e81');
+                g.addColorStop(1, '#09090b');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 1024, 1024);
+                ctx.lineWidth = 38;
+                for (let i = -400; i < 1500; i += 220) {
+                    ctx.strokeStyle = i % 440 === 0 ? '#ec4899' : '#22d3ee';
+                    ctx.beginPath(); ctx.moveTo(i, 1024); ctx.lineTo(i + 420, 0); ctx.stroke();
+                }
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = '900 54px JetBrains Mono, monospace';
+                ctx.fillText('NEON // RIDER', 72, 520);
+
+            } else if (theme === 'CARBON') {
+                const g = ctx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#64748b');
+                g.addColorStop(0.35, '#111827');
+                g.addColorStop(0.7, '#334155');
+                g.addColorStop(1, '#090d16');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 1024, 1024);
+                for (let y = -32; y < 1056; y += 32) {
+                    for (let x = -32; x < 1056; x += 32) {
+                        ctx.fillStyle = ((x + y) / 32) % 2 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.30)';
+                        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 32, y); ctx.lineTo(x + 16, y + 32); ctx.lineTo(x - 16, y + 32); ctx.closePath(); ctx.fill();
+                    }
+                }
+                ctx.strokeStyle = 'rgba(203,213,225,0.65)';
+                ctx.lineWidth = 5;
+                for (let y = 16; y < 1024; y += 64) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1024, y); ctx.stroke(); }
+
+            } else if (theme === 'EMERALD') {
+                const g = ctx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#d1fae5');
+                g.addColorStop(0.28, '#10b981');
+                g.addColorStop(0.62, '#065f46');
+                g.addColorStop(1, '#022c22');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 1024, 1024);
+                ctx.strokeStyle = 'rgba(236,253,245,0.55)';
+                ctx.lineWidth = 5;
+                for (let i = -1024; i < 2048; i += 96) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + 1024, 1024); ctx.stroke();
+                }
+                ctx.fillStyle = 'rgba(6,78,59,0.58)';
+                for (let i = 0; i < 18; i++) {
+                    const x = (i * 271) % 1024, y = (i * 419) % 1024;
+                    ctx.beginPath(); ctx.moveTo(x, y - 54); ctx.lineTo(x + 48, y - 27); ctx.lineTo(x + 48, y + 27); ctx.lineTo(x, y + 54); ctx.lineTo(x - 48, y + 27); ctx.lineTo(x - 48, y - 27); ctx.closePath(); ctx.fill();
+                }
+
+            } else if (theme === 'ARCTIC') {
+                const g = ctx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#f8fafc');
+                g.addColorStop(0.45, '#bae6fd');
+                g.addColorStop(1, '#475569');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 1024, 1024);
+                for (let i = 0; i < 70; i++) {
+                    const x = (i * 173) % 1024, y = (i * 293) % 1024;
+                    ctx.fillStyle = i % 2 ? 'rgba(15,23,42,0.54)' : 'rgba(71,85,105,0.42)';
+                    ctx.beginPath(); ctx.moveTo(x - 70, y - 25); ctx.lineTo(x - 20, y - 62); ctx.lineTo(x + 74, y - 18); ctx.lineTo(x + 48, y + 52); ctx.lineTo(x - 46, y + 64); ctx.closePath(); ctx.fill();
+                }
+
             } else {
                 // MECHA
                 ctx.fillStyle = '#241046';
@@ -986,6 +1103,30 @@
                 g.addColorStop(1, '#94a3b8');
                 dCtx.fillStyle = g;
                 dCtx.fillRect(0, 0, 1024, 1024);
+            } else if (theme === 'NEONRIDER') {
+                const g = dCtx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#09090b'); g.addColorStop(0.45, '#ec4899'); g.addColorStop(0.72, '#312e81'); g.addColorStop(1, '#22d3ee');
+                dCtx.fillStyle = g; dCtx.fillRect(0, 0, 1024, 1024);
+                dCtx.strokeStyle = 'rgba(255,255,255,0.8)'; dCtx.lineWidth = 18;
+                dCtx.beginPath(); dCtx.moveTo(40, 900); dCtx.lineTo(900, 80); dCtx.stroke();
+            } else if (theme === 'CARBON') {
+                dCtx.fillStyle = '#334155'; dCtx.fillRect(0, 0, 1024, 1024);
+                for (let y = 0; y < 1024; y += 32) for (let x = 0; x < 1024; x += 32) {
+                    dCtx.fillStyle = ((x + y) / 32) % 2 ? '#0f172a' : '#64748b';
+                    dCtx.fillRect(x + ((y / 32) % 2) * 16, y, 16, 16);
+                }
+            } else if (theme === 'EMERALD') {
+                const g = dCtx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#d1fae5'); g.addColorStop(0.38, '#10b981'); g.addColorStop(1, '#022c22');
+                dCtx.fillStyle = g; dCtx.fillRect(0, 0, 1024, 1024);
+                dCtx.strokeStyle = 'rgba(236,253,245,0.7)'; dCtx.lineWidth = 10;
+                for (let i = -1024; i < 2048; i += 120) { dCtx.beginPath(); dCtx.moveTo(i, 0); dCtx.lineTo(i + 1024, 1024); dCtx.stroke(); }
+            } else if (theme === 'ARCTIC') {
+                const g = dCtx.createLinearGradient(0, 0, 1024, 1024);
+                g.addColorStop(0, '#f8fafc'); g.addColorStop(0.5, '#bae6fd'); g.addColorStop(1, '#475569');
+                dCtx.fillStyle = g; dCtx.fillRect(0, 0, 1024, 1024);
+                dCtx.strokeStyle = 'rgba(15,23,42,0.7)'; dCtx.lineWidth = 28;
+                for (let i = -1024; i < 2048; i += 180) { dCtx.beginPath(); dCtx.moveTo(i, 0); dCtx.lineTo(i + 720, 1024); dCtx.stroke(); }
             } else {
                 const g = dCtx.createLinearGradient(0, 0, 1024, 1024);
                 g.addColorStop(0, '#1e1035');
@@ -1027,7 +1168,13 @@
                 CRIMSON: { bg1: '#18181b', bg2: '#7f1d1d', stripe: '#ef4444', knuckle: '#dc2626' },
                 GLOVEFADE: { bg1: '#1e3a8a', bg2: '#be185d', stripe: '#f59e0b', knuckle: '#ec4899' },
                 COBRA: { bg1: '#e2e8f0', bg2: '#64748b', stripe: '#ca8a04', knuckle: '#475569' },
-                TACTICAL: { bg1: '#181c26', bg2: '#0f172a', stripe: '#38bdf8', knuckle: '#1e293b' }
+                TACTICAL: { bg1: '#181c26', bg2: '#0f172a', stripe: '#38bdf8', knuckle: '#1e293b' },
+                DIAMONDBACK: { bg1: '#14532d', bg2: '#052e16', stripe: '#a3e635', knuckle: '#84cc16', pattern: 'scale' },
+                MOGUL: { bg1: '#0c4a6e', bg2: '#082f49', stripe: '#7dd3fc', knuckle: '#e0f2fe', pattern: 'topo' },
+                COBALT: { bg1: '#172554', bg2: '#020617', stripe: '#60a5fa', knuckle: '#1d4ed8', pattern: 'skull' },
+                ARID: { bg1: '#d6b36a', bg2: '#6b5b3e', stripe: '#e8d7a8', knuckle: '#a16207', pattern: 'camo' },
+                OMEGA: { bg1: '#f97316', bg2: '#111827', stripe: '#facc15', knuckle: '#fb923c', pattern: 'bolt' },
+                SLINGSHOT: { bg1: '#7f1d1d', bg2: '#171717', stripe: '#ef4444', knuckle: '#991b1b', pattern: 'chevron' }
             };
             const pal = themes[gloveTheme] || themes.VICE;
 
@@ -1054,6 +1201,40 @@
             ctx.moveTo(0, 140); ctx.lineTo(512, 290);
             ctx.moveTo(0, 360); ctx.lineTo(512, 210);
             ctx.stroke();
+
+            if (pal.pattern === 'scale') {
+                ctx.strokeStyle = 'rgba(190,242,100,0.48)'; ctx.lineWidth = 3;
+                for (let row = 0; row < 9; row++) for (let col = 0; col < 8; col++) {
+                    const x = col * 72 + (row % 2) * 36, y = row * 58;
+                    ctx.beginPath(); ctx.arc(x, y, 32, 0.15, Math.PI - 0.15); ctx.stroke();
+                }
+            } else if (pal.pattern === 'topo') {
+                ctx.strokeStyle = 'rgba(224,242,254,0.52)'; ctx.lineWidth = 2;
+                for (let i = 0; i < 24; i++) {
+                    ctx.beginPath(); ctx.ellipse(256 + Math.sin(i * 0.7) * 74, 256 + Math.cos(i * 0.45) * 58, 54 + i * 7, 26 + i * 4, i * 0.12, 0, Math.PI * 2); ctx.stroke();
+                }
+            } else if (pal.pattern === 'skull') {
+                ctx.fillStyle = 'rgba(219,234,254,0.78)';
+                for (let y = 70; y < 540; y += 150) for (let x = 70; x < 540; x += 160) {
+                    ctx.beginPath(); ctx.arc(x, y, 25, Math.PI, Math.PI * 2); ctx.lineTo(x + 23, y + 22); ctx.lineTo(x + 12, y + 22); ctx.lineTo(x + 8, y + 33); ctx.lineTo(x - 1, y + 22); ctx.lineTo(x - 14, y + 22); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle = '#172554'; ctx.fillRect(x - 12, y + 3, 6, 7); ctx.fillRect(x + 6, y + 3, 6, 7); ctx.fillStyle = 'rgba(219,234,254,0.78)';
+                }
+            } else if (pal.pattern === 'camo') {
+                const camoColors = ['rgba(67,54,36,0.68)', 'rgba(95,107,62,0.62)', 'rgba(230,215,168,0.72)'];
+                for (let i = 0; i < 44; i++) {
+                    const x = (i * 137) % 512, y = (i * 223) % 512;
+                    ctx.fillStyle = camoColors[i % camoColors.length]; ctx.beginPath(); ctx.ellipse(x, y, 18 + (i % 4) * 9, 10 + (i % 5) * 5, i * 0.73, 0, Math.PI * 2); ctx.fill();
+                }
+            } else if (pal.pattern === 'bolt') {
+                ctx.fillStyle = 'rgba(250,204,21,0.86)';
+                for (let i = 0; i < 6; i++) {
+                    const x = 24 + i * 92, y = (i % 2) * 180;
+                    ctx.beginPath(); ctx.moveTo(x + 28, y); ctx.lineTo(x + 4, y + 66); ctx.lineTo(x + 28, y + 66); ctx.lineTo(x + 12, y + 124); ctx.lineTo(x + 70, y + 48); ctx.lineTo(x + 44, y + 48); ctx.closePath(); ctx.fill();
+                }
+            } else if (pal.pattern === 'chevron') {
+                ctx.strokeStyle = 'rgba(248,113,113,0.72)'; ctx.lineWidth = 16;
+                for (let y = -80; y < 600; y += 90) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y + 70); ctx.lineTo(512, y); ctx.stroke(); }
+            }
 
             const tex = new THREE.CanvasTexture(c);
             tex.wrapS = THREE.RepeatWrapping;
@@ -1098,14 +1279,14 @@
             muscleBumpTex.wrapT = THREE.RepeatWrapping;
             muscleBumpTex.repeat.set(3, 3);
 
-            ['FADE', 'DOPPLER', 'CASEHARDENED', 'LORE', 'TIGER', 'PRINTSTREAM', 'KITSUNE', 'MECHA'].forEach(theme => {
+            ['FADE', 'DOPPLER', 'CASEHARDENED', 'LORE', 'TIGER', 'PRINTSTREAM', 'KITSUNE', 'MECHA', 'NEONRIDER', 'CARBON', 'EMERALD', 'ARCTIC'].forEach(theme => {
                 weaponSkinTextures[theme] = {
                     gun: buildCS2WeaponTexture(theme),
                     blade: buildCS2BladeTexture(theme)
                 };
             });
 
-            ['VICE', 'PANDORA', 'CRIMSON', 'GLOVEFADE', 'COBRA', 'TACTICAL'].forEach(gTheme => {
+            ['VICE', 'PANDORA', 'CRIMSON', 'GLOVEFADE', 'COBRA', 'TACTICAL', 'DIAMONDBACK', 'MOGUL', 'COBALT', 'ARID', 'OMEGA', 'SLINGSHOT'].forEach(gTheme => {
                 gloveSkinTextures[gTheme] = buildCS2GloveTexture(gTheme);
             });
 
@@ -1942,6 +2123,8 @@
             muzzleLight = new THREE.PointLight(0xff2a85, 0, 7);
             muzzleLight.position.set(0, 0.032, -0.72);
             gun.add(muzzleLight);
+            gun.userData.muzzleFlash = muzzleFlashMesh;
+            gun.userData.muzzleLight = muzzleLight;
 
             const laserGeo = new THREE.BufferGeometry().setFromPoints([
                 new THREE.Vector3(0.018, 0.052, -0.35),
@@ -1974,6 +2157,202 @@
             gun.userData.leftGripAnchor = leftGripAnchor;
 
             return gun;
+        }
+
+        function buildAK47Rifle() {
+            const gun = new THREE.Group();
+            gun.name = 'AK47Rifle';
+            const core = new THREE.Group();
+            core.rotation.y = Math.PI;
+            gun.add(core);
+
+            const wood = new THREE.MeshStandardMaterial({ color: 0x8b451f, roughness: 0.62, metalness: 0.02 });
+            const darkWood = new THREE.MeshStandardMaterial({ color: 0x5b301d, roughness: 0.68, metalness: 0.02 });
+            const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.060, 0.275), sharedMaterials.gunFDE);
+            receiver.position.set(0, 0.030, 0.015);
+            core.add(receiver);
+            const dustCover = new THREE.Mesh(new THREE.CylinderGeometry(0.029, 0.029, 0.25, 10), sharedMaterials.gunMetal);
+            dustCover.rotation.x = Math.PI / 2;
+            dustCover.position.set(0, 0.064, 0.02);
+            core.add(dustCover);
+
+            const stock = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.090, 0.205), wood);
+            stock.position.set(0, 0.002, -0.205);
+            stock.rotation.x = -0.08;
+            core.add(stock);
+            const stockPad = new THREE.Mesh(new THREE.BoxGeometry(0.048, 0.094, 0.016), sharedMaterials.gunMetal);
+            stockPad.position.set(0, 0.002, -0.310);
+            core.add(stockPad);
+
+            const handguard = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.034, 0.205, 8), wood);
+            handguard.rotation.x = Math.PI / 2;
+            handguard.position.set(0, 0.029, 0.255);
+            core.add(handguard);
+            for (let side = -1; side <= 1; side += 2) {
+                const rib = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.010, 0.17), darkWood);
+                rib.position.set(side * 0.033, 0.03, 0.255);
+                core.add(rib);
+            }
+
+            const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.010, 0.36, 14), sharedMaterials.gunBarrelSteel);
+            barrel.rotation.x = Math.PI / 2;
+            barrel.position.set(0, 0.033, 0.49);
+            core.add(barrel);
+            const frontSight = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.055, 0.018), sharedMaterials.gunMetal);
+            frontSight.position.set(0, 0.068, 0.43);
+            core.add(frontSight);
+            const muzzle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.012, 0.055, 12), sharedMaterials.gunMetal);
+            muzzle.rotation.x = Math.PI / 2;
+            muzzle.position.set(0, 0.033, 0.685);
+            core.add(muzzle);
+
+            const rearSight = new THREE.Mesh(new THREE.BoxGeometry(0.030, 0.028, 0.022), sharedMaterials.gunMetal);
+            rearSight.position.set(0, 0.076, -0.065);
+            core.add(rearSight);
+            const pistolGrip = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.120, 0.052), darkWood);
+            pistolGrip.position.set(0, -0.083, -0.085);
+            pistolGrip.rotation.x = -0.20;
+            core.add(pistolGrip);
+
+            const magazines = [];
+            for (let index = 0; index < 2; index++) {
+                const magazine = new THREE.Group();
+                const body = new THREE.CylinderGeometry(0.023, 0.034, 0.19, 12, 16);
+                const positions = body.attributes.position;
+                for (let vertex = 0; vertex < positions.count; vertex++) {
+                    const v = THREE.MathUtils.clamp(positions.getY(vertex) / 0.19 + 0.5, 0, 1);
+                    positions.setX(vertex, positions.getX(vertex) + Math.sin(v * Math.PI) * 0.018);
+                }
+                body.computeVertexNormals();
+                const shell = new THREE.Mesh(body, sharedMaterials.gunFDE);
+                shell.position.y = -0.09;
+                magazine.add(shell);
+                const floorPlate = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.012, 0.060), sharedMaterials.gunMetal);
+                floorPlate.position.set(0.018, -0.187, 0);
+                magazine.add(floorPlate);
+                magazine.position.set(0, -0.075, 0.035);
+                core.add(magazine);
+                magazine.userData.reloadHome = magazine.position.clone();
+                magazine.userData.reloadHomeRotation = magazine.rotation.clone();
+                magazine.visible = index === 0;
+                magazines.push(magazine);
+            }
+            gun.userData.magazineGroups = magazines;
+            gun.userData.loadedMagazineIndex = 0;
+
+            const chargingHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.04, 10), sharedMaterials.gunMetal);
+            chargingHandle.rotation.z = Math.PI / 2;
+            chargingHandle.position.set(-0.036, 0.045, -0.015);
+            core.add(chargingHandle);
+            gun.userData.chargingHandle = chargingHandle;
+
+            const flash = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.20, 8), new THREE.MeshBasicMaterial({ color: 0xffc857, transparent: true, opacity: 0 }));
+            flash.rotation.x = -Math.PI / 2;
+            flash.position.set(0, 0.033, -0.73);
+            gun.add(flash);
+            const light = new THREE.PointLight(0xffb347, 0, 6);
+            light.position.copy(flash.position);
+            gun.add(light);
+            gun.userData.muzzleFlash = flash;
+            gun.userData.muzzleLight = light;
+
+            const rightGripAnchor = new THREE.Group();
+            const rX = new THREE.Vector3(0.05, 0.95, -0.31).normalize();
+            const rY = new THREE.Vector3(-0.16, 0.29, -0.94).normalize();
+            const rZ = new THREE.Vector3().crossVectors(rX, rY).normalize();
+            rY.crossVectors(rZ, rX).normalize();
+            rightGripAnchor.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(rX, rY, rZ));
+            rightGripAnchor.position.set(0.028, -0.102, 0.122);
+            gun.add(rightGripAnchor);
+            gun.userData.rightGripAnchor = rightGripAnchor;
+            const leftGripAnchor = new THREE.Group();
+            const lY = new THREE.Vector3(0.42, 0.26, -0.87).normalize();
+            const lZ = new THREE.Vector3(0.30, 0.86, 0.41).normalize();
+            const lX = new THREE.Vector3().crossVectors(lY, lZ).normalize();
+            lZ.crossVectors(lX, lY).normalize();
+            leftGripAnchor.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(lX, lY, lZ));
+            leftGripAnchor.position.set(-0.036, -0.044, -0.135);
+            gun.add(leftGripAnchor);
+            gun.userData.leftGripAnchor = leftGripAnchor;
+            return gun;
+        }
+
+        function buildButterflyKnife() {
+            const knife = new THREE.Group();
+            knife.name = 'ButterflyKnife';
+            const bladeRig = new THREE.Group();
+            const blade = createLoftedAnatomicalMesh(0.205, 22, 18, (v, theta) => {
+                const taper = v > 0.62 ? Math.cos(((v - 0.62) / 0.38) * Math.PI * 0.5) : 1;
+                return { rx: 0.004 * taper, rz: 0.018 * taper + 0.001, cz: v * 0.012 };
+            }, 'damascusBlade', false);
+            blade.position.y = 0.145;
+            bladeRig.add(blade);
+            const tang = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.062, 0.018), sharedMaterials.gunMetal);
+            tang.position.y = 0.045;
+            bladeRig.add(tang);
+            const pivotPins = [];
+            for (let side = -1; side <= 1; side += 2) {
+                const pivot = new THREE.Group();
+                pivot.position.set(0, 0.025, side * 0.018);
+                const handle = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.112, 0.018), sharedMaterials.knifeGrip);
+                handle.position.y = -0.054;
+                pivot.add(handle);
+                for (let i = 0; i < 4; i++) {
+                    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.020, 0.004, 0.020), sharedMaterials.gunMetal);
+                    slot.position.set(0, -0.016 - i * 0.022, side * 0.001);
+                    pivot.add(slot);
+                }
+                const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.024, 10), sharedMaterials.bayonetEdge);
+                pin.rotation.z = Math.PI / 2;
+                pivot.add(pin);
+                bladeRig.add(pivot);
+                pivotPins.push(pivot);
+            }
+            createCSKnifeHandAnchors(knife, bladeRig, false);
+            knife.userData.bladeRig = bladeRig;
+            knife.userData.baseBladeQuat = bladeRig.quaternion.clone();
+            knife.userData.butterflyPivots = pivotPins;
+            return knife;
+        }
+
+        function buildTalonKnife() {
+            const knife = new THREE.Group();
+            knife.name = 'TalonKnife';
+            const bladeRig = new THREE.Group();
+            const handle = createLoftedAnatomicalMesh(0.096, 18, 20, (v) => ({
+                rx: 0.010 + Math.sin(v * Math.PI) * 0.004,
+                rz: 0.015 + Math.sin(v * Math.PI * 3) * 0.002
+            }), 'karambitGrip', true);
+            handle.position.y = -0.016;
+            bladeRig.add(handle);
+            const guard = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.014, 0.060), sharedMaterials.gunMetal);
+            guard.position.y = 0.040;
+            bladeRig.add(guard);
+
+            const bladeGeo = new THREE.CylinderGeometry(1, 1, 0.22, 24, 36, false);
+            const positions = bladeGeo.attributes.position;
+            for (let i = 0; i < positions.count; i++) {
+                const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
+                const v = THREE.MathUtils.clamp(y / 0.22 + 0.5, 0, 1);
+                const curve = v * v * 0.085;
+                const width = 0.025 * Math.sin(Math.pow(1 - v * 0.94, 0.65) * Math.PI * 0.5);
+                const pointBend = v > 0.78 ? Math.pow((v - 0.78) / 0.22, 1.5) * 0.040 : 0;
+                positions.setXYZ(i, x * 0.005, y + 0.052, z * width + curve - pointBend);
+            }
+            bladeGeo.computeVertexNormals();
+            const blade = new THREE.Mesh(bladeGeo, sharedMaterials.damascusBlade);
+            blade.position.y = 0.07;
+            blade.castShadow = true;
+            bladeRig.add(blade);
+            for (let i = 0; i < 5; i++) {
+                const spine = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.004, 0.008), sharedMaterials.bayonetEdge);
+                spine.position.set(0, 0.09 + i * 0.012, 0.022);
+                bladeRig.add(spine);
+            }
+            createCSKnifeHandAnchors(knife, bladeRig, false);
+            knife.userData.bladeRig = bladeRig;
+            knife.userData.baseBladeQuat = bladeRig.quaternion.clone();
+            return knife;
         }
 
         function createCSKnifeHandAnchors(knifeGroup, bladeRig, isKarambit = false) {
@@ -2409,14 +2788,19 @@
             skeletonRig.weaponMount = weaponMount;
 
             const rifle = buildTacticalRifle();
+            const ak47 = buildAK47Rifle();
             const bayonet = buildCSBayonetKnife();
             const karambit = buildKarambitKnife();
-            bayonet.visible = false;
-            karambit.visible = false;
-            weaponMount.add(rifle, bayonet, karambit);
+            const butterfly = buildButterflyKnife();
+            const talon = buildTalonKnife();
+            [ak47, bayonet, karambit, butterfly, talon].forEach(weapon => { weapon.visible = false; });
+            weaponMount.add(rifle, ak47, bayonet, karambit, butterfly, talon);
             skeletonRig.rifle = rifle;
+            skeletonRig.ak47 = ak47;
             skeletonRig.bayonet = bayonet;
             skeletonRig.karambit = karambit;
+            skeletonRig.butterfly = butterfly;
+            skeletonRig.talon = talon;
 
             const upperArmLen = 0.310, forearmLen = 0.300;
             skeletonRig.upperArmLen = upperArmLen;
@@ -2596,7 +2980,7 @@
           const mount = skeletonRig.weaponMount;
           if (!mount) return;
           
-          const isKnife = (state.equipped !== 'RIFLE');
+          const isKnife = isKnifeType();
           const aspect = window.innerWidth / window.innerHeight;
           const isPortrait = aspect < 1.0;
           
@@ -2611,8 +2995,9 @@
           
           let hipPos, adsPos;
           if (isKnife) {
-            const isKarambit = (state.equipped === 'KARAMBIT');
-            const kx = isPortrait ? (isKarambit ? 0.074 : 0.092) : (isKarambit ? 0.112 : 0.125);
+            const isCurvedKnife = state.equipped === 'KARAMBIT' || state.equipped === 'TALON';
+            const isKarambit = state.equipped === 'KARAMBIT';
+            const kx = isPortrait ? (isCurvedKnife ? 0.074 : 0.092) : (isCurvedKnife ? 0.112 : 0.125);
             const ky = isPortrait ? 0.022 : 0.032;
             const kz = isPortrait ? -0.345 : -0.315;
             hipPos = new THREE.Vector3(kx + walkBobX, ky + breathY - walkBobY - equipDrop, kz);
@@ -2663,9 +3048,7 @@
             }
           }
           
-          const activeWeapon = state.equipped === 'RIFLE' ?
-            skeletonRig.rifle :
-            (state.equipped === 'BAYONET' ? skeletonRig.bayonet : skeletonRig.karambit);
+                    const activeWeapon = getActiveWeaponModel();
           
           if (state.weaponInspectTimer > 0) {
             const ip = 1.0 - (state.weaponInspectTimer / 1.4);
@@ -2683,21 +3066,39 @@
                             skeletonRig.bayonet.userData.bladeRig.quaternion.copy(skeletonRig.bayonet.userData.baseBladeQuat).multiply(spinQ);
                             rotZ -= lookSin * 0.32;
                             rotY += lookSin * 0.28;
+                        } else if (state.equipped === 'BUTTERFLY' && skeletonRig.butterfly.userData.butterflyPivots) {
+                            const flip = Math.sin(ip * Math.PI * 2);
+                            skeletonRig.butterfly.userData.butterflyPivots[0].rotation.z = flip * 1.15;
+                            skeletonRig.butterfly.userData.butterflyPivots[1].rotation.z = -flip * 1.15;
+                            rotZ -= lookSin * 0.38;
+                            rotY += Math.sin(ip * Math.PI * 2) * 0.26;
+                        } else if (state.equipped === 'TALON' && skeletonRig.talon.userData.bladeRig) {
+                            const spinAngle = Math.sin(ip * Math.PI * 2) * Math.PI * 1.2;
+                            const spinQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), spinAngle);
+                            skeletonRig.talon.userData.bladeRig.quaternion.copy(skeletonRig.talon.userData.baseBladeQuat).multiply(spinQ);
+                            rotZ -= lookSin * 0.24;
+                            rotY += lookSin * 0.18;
             } else {
               rotZ -= lookSin * 0.45;
               rotY += Math.sin(ip * Math.PI * 2) * 0.32;
             }
-          } else if (skeletonRig.karambit && skeletonRig.karambit.userData.bladeRig && skeletonRig.karambit.userData.baseBladeQuat) {
-            skeletonRig.karambit.userData.bladeRig.quaternion.copy(skeletonRig.karambit.userData.baseBladeQuat);
-          }
-                    if (state.weaponInspectTimer <= 0 && skeletonRig.bayonet && skeletonRig.bayonet.userData.bladeRig && skeletonRig.bayonet.userData.baseBladeQuat) {
-                        skeletonRig.bayonet.userData.bladeRig.quaternion.copy(skeletonRig.bayonet.userData.baseBladeQuat);
+                    }
+                    if (state.weaponInspectTimer <= 0) {
+                        ['bayonet', 'karambit', 'butterfly', 'talon'].forEach(name => {
+                            const weapon = skeletonRig[name];
+                            if (weapon && weapon.userData.bladeRig && weapon.userData.baseBladeQuat) {
+                                weapon.userData.bladeRig.quaternion.copy(weapon.userData.baseBladeQuat);
+                            }
+                            if (weapon && weapon.userData.butterflyPivots) {
+                                weapon.userData.butterflyPivots.forEach(pivot => pivot.rotation.set(0, 0, 0));
+                            }
+                        });
                     }
           
           mount.rotation.set(rotX, rotY, rotZ);
           mount.updateMatrixWorld(true);
           
-                    const rifleData = skeletonRig.rifle.userData;
+                      const rifleData = getActiveFirearmModel().userData;
                     const magazineGroups = rifleData.magazineGroups;
                     if (magazineGroups && magazineGroups.length === 2) {
                         const loadedIndex = rifleData.loadedMagazineIndex;
@@ -2734,7 +3135,7 @@
                                 chargingHandle.position.z = -0.095 - rack * 0.042;
                             }
                         } else if (rifleData.chargingHandle) {
-                            const inspect = state.equipped === 'RIFLE' && state.weaponInspectTimer > 0
+                            const inspect = state.weaponInspectTimer > 0
                                 ? Math.sin((1 - state.weaponInspectTimer / 1.4) * Math.PI)
                                 : 0;
                             rifleData.chargingHandle.position.z = -0.095 - inspect * 0.035;
@@ -2819,8 +3220,9 @@
           poseHandForWeapon(skeletonRig.rightHand, 1, rightHandRole, state.recoilKick);
           poseHandForWeapon(skeletonRig.leftHand, -1, isKnife ? 'LEFT_KNIFE_GUARD' : 'LEFT_CCLAMP', 0);
           
-          if (skeletonRig.rifle.userData.triggerShoe) {
-            skeletonRig.rifle.userData.triggerShoe.rotation.x = 1.80 - state.recoilKick * 0.40;
+                    const activeFirearm = getActiveFirearmModel();
+                    if (activeFirearm.userData.triggerShoe) {
+                        activeFirearm.userData.triggerShoe.rotation.x = 1.80 - state.recoilKick * 0.40;
           }
         }
 
@@ -2905,9 +3307,10 @@
         const raycaster = new THREE.Raycaster();
 
         function spawnBrassShell() {
-            if (!skeletonRig.rifle) return;
+            const firearm = getActiveFirearmModel();
+            if (!firearm) return;
             const shell = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.024, 8), sharedMaterials.brass);
-            const worldPos = new THREE.Vector3(0.03, 0.04, -0.02).applyMatrix4(skeletonRig.rifle.matrixWorld);
+            const worldPos = new THREE.Vector3(0.03, 0.04, -0.02).applyMatrix4(firearm.matrixWorld);
             shell.position.copy(worldPos);
             scene.add(shell);
             activeShells.push({
@@ -2931,7 +3334,7 @@
         function fireWeapon(isHeavyKnifeStab = false) {
             const now = performance.now();
 
-            if (state.equipped !== 'RIFLE') {
+            if (isKnifeType()) {
                 if (state.knifeSlashTimer > 0.06) return;
                 state.knifeHeavyStab = isHeavyKnifeStab;
                 state.knifeSlashTimer = isHeavyKnifeStab ? 0.48 : 0.34;
@@ -2967,10 +3370,13 @@
             state.recoilPitch += (0.016 + Math.random() * 0.005) * adsRecoilMult;
             state.recoilYaw += (Math.random() - 0.5) * 0.009 * adsRecoilMult;
 
-            if (muzzleFlashMesh && muzzleLight) {
-                muzzleFlashMesh.material.opacity = 0.98;
-                muzzleFlashMesh.rotation.z = Math.random() * Math.PI * 2;
-                muzzleLight.intensity = 5.5;
+            const firearm = getActiveFirearmModel();
+            const flash = firearm.userData.muzzleFlash || muzzleFlashMesh;
+            const flashLight = firearm.userData.muzzleLight || muzzleLight;
+            if (flash && flashLight) {
+                flash.material.opacity = 0.98;
+                flash.rotation.z = Math.random() * Math.PI * 2;
+                flashLight.intensity = 5.5;
             }
 
             spawnBrassShell();
@@ -2989,27 +3395,40 @@
         }
 
         function equipWeapon(type) {
+            const weaponTypes = ['RIFLE', 'BAYONET', 'KARAMBIT', 'AK47', 'BUTTERFLY', 'TALON'];
+            if (!weaponTypes.includes(type)) return;
+            if (state.isReloading) {
+                state.isReloading = false;
+                state.reloadProgress = 0;
+            }
             state.equipped = type;
             state.isADS = false;
             mouseADS = false;
             state.equipTransition = 1.0;
             document.getElementById('btn-touch-ads').classList.remove('pressed');
+            weaponTypes.forEach(weaponType => {
+                const model = skeletonRig[weaponType.toLowerCase()];
+                if (model) model.visible = weaponType === type;
+                const button = document.getElementById(`btn-equip-${weaponType.toLowerCase()}`);
+                if (button) button.classList.toggle('active', weaponType === type);
+            });
 
-            if (skeletonRig.rifle) skeletonRig.rifle.visible = (type === 'RIFLE');
-            if (skeletonRig.bayonet) skeletonRig.bayonet.visible = (type === 'BAYONET');
-            if (skeletonRig.karambit) skeletonRig.karambit.visible = (type === 'KARAMBIT');
-
-            document.getElementById('btn-equip-rifle').classList.toggle('active', type === 'RIFLE');
-            document.getElementById('btn-equip-bayonet').classList.toggle('active', type === 'BAYONET');
-            document.getElementById('btn-equip-karambit').classList.toggle('active', type === 'KARAMBIT');
-
-            const isKnife = (type !== 'RIFLE');
-            document.getElementById('weapon-title-hud').textContent =
-                type === 'RIFLE' ? 'M4A1 SOPMOD C8' : (type === 'BAYONET' ? 'CS2 M9 BAYONET' : 'CS2 METALİK KARAMBİT');
+            const firearm = isKnifeType(type) ? skeletonRig.rifle : getActiveFirearmModel();
+            muzzleFlashMesh = firearm.userData.muzzleFlash || muzzleFlashMesh;
+            muzzleLight = firearm.userData.muzzleLight || muzzleLight;
+            const isKnife = isKnifeType(type);
+            const weaponTitles = {
+                RIFLE: 'M4A1 SOPMOD C8', AK47: 'AK-47 CLASSIC', BAYONET: 'CS2 M9 BAYONET',
+                KARAMBIT: 'CS2 METALİK KARAMBİT', BUTTERFLY: 'CS2 BUTTERFLY KNIFE', TALON: 'CS2 TALON KNIFE'
+            };
+            const nextWeaponLabels = {
+                RIFLE: 'M9', BAYONET: 'KARAMBİT', KARAMBIT: 'AK-47',
+                AK47: 'BALİSONG', BUTTERFLY: 'TALON', TALON: 'TÜFEK'
+            };
+            document.getElementById('weapon-title-hud').textContent = weaponTitles[type];
             document.getElementById('ads-indicator').textContent =
                 isKnife ? 'CS2 Çift El Gard (2 El IK)' : 'C-Clamp Çift El IK';
-            document.getElementById('switch-lbl').textContent =
-                type === 'RIFLE' ? 'KASATURA' : (type === 'BAYONET' ? 'KARAMBİT' : 'TÜFEK');
+            document.getElementById('switch-lbl').textContent = nextWeaponLabels[type];
             document.getElementById('fire-label').textContent = isKnife ? 'KES' : 'ATEŞ';
             document.getElementById('ads-btn-label').textContent = isKnife ? 'SAPLA' : 'NİŞAN';
             document.getElementById('reload-lbl').textContent = isKnife ? 'İNCELE' : 'ŞARJÖR';
@@ -3017,25 +3436,26 @@
         }
 
         function cycleWeapon() {
-            if (state.equipped === 'RIFLE') equipWeapon('BAYONET');
-            else if (state.equipped === 'BAYONET') equipWeapon('KARAMBIT');
-            else equipWeapon('RIFLE');
+            const weaponTypes = ['RIFLE', 'BAYONET', 'KARAMBIT', 'AK47', 'BUTTERFLY', 'TALON'];
+            const currentIndex = weaponTypes.indexOf(state.equipped);
+            equipWeapon(weaponTypes[(currentIndex + 1) % weaponTypes.length]);
         }
 
         function triggerReload() {
-            if (state.isReloading || state.ammo === 35 || state.reserveAmmo <= 0 || state.equipped !== 'RIFLE') return;
+            if (state.isReloading || state.ammo === 35 || state.reserveAmmo <= 0 || isKnifeType()) return;
             state.isReloading = true;
             state.reloadProgress = 0;
             state.isADS = false;
             mouseADS = false;
             document.getElementById('btn-touch-ads').classList.remove('pressed');
             document.getElementById('ads-indicator').textContent = 'C-Clamp Çift El IK';
-            const magazineGroups = skeletonRig.rifle && skeletonRig.rifle.userData.magazineGroups;
+            const firearmData = getActiveFirearmModel().userData;
+            const magazineGroups = firearmData.magazineGroups;
             if (magazineGroups) {
                 magazineGroups.forEach((mag, index) => {
                     mag.position.copy(mag.userData.reloadHome);
                     mag.rotation.copy(mag.userData.reloadHomeRotation);
-                    mag.visible = index === skeletonRig.rifle.userData.loadedMagazineIndex;
+                    mag.visible = index === firearmData.loadedMagazineIndex;
                 });
             }
             playProceduralSound('reload');
@@ -3047,7 +3467,7 @@
         }
 
         function triggerReloadOrInspect() {
-            if (state.equipped !== 'RIFLE') triggerInspectWeapon();
+            if (isKnifeType()) triggerInspectWeapon();
             else triggerReload();
         }
 
@@ -3110,7 +3530,7 @@
 
         function setWeaponSkinTheme(theme) {
             state.weaponTheme = theme;
-            ['fade', 'doppler', 'casehardened', 'lore', 'tiger', 'printstream', 'kitsune', 'mecha'].forEach(t => {
+            ['fade', 'doppler', 'casehardened', 'lore', 'tiger', 'printstream', 'kitsune', 'mecha', 'neonrider', 'carbon', 'emerald', 'arctic'].forEach(t => {
                 const btn = document.getElementById(`btn-camo-${t}`);
                 if (btn) btn.classList.toggle('active', t.toUpperCase() === theme);
             });
@@ -3130,7 +3550,7 @@
 
         function setGloveSkinTheme(gTheme) {
             state.gloveTheme = gTheme;
-            ['vice', 'pandora', 'crimson', 'fade', 'cobra', 'tactical'].forEach(gt => {
+            ['vice', 'pandora', 'crimson', 'fade', 'cobra', 'tactical', 'diamondback', 'mogul', 'cobalt', 'arid', 'omega', 'slingshot'].forEach(gt => {
                 const btn = document.getElementById(`btn-glove-${gt}`);
                 if (btn) {
                     const isAct = (gt.toUpperCase() === gTheme || (gt === 'fade' && gTheme === 'GLOVEFADE') || (gt === 'tactical' && gTheme === 'TACTICAL'));
@@ -3253,7 +3673,7 @@
             const adsBtn = document.getElementById('btn-touch-ads');
             adsBtn.addEventListener('pointerdown', (e) => {
                 e.stopPropagation();
-                if (state.equipped !== 'RIFLE') {
+                if (isKnifeType()) {
                     fireWeapon(true);
                     return;
                 }
@@ -3269,7 +3689,7 @@
                 if (e.pointerType === 'mouse' && e.button === 0) {
                     state.isFiringHeld = true;
                     fireWeapon(false);
-                } else if (e.pointerType === 'mouse' && e.button === 2 && state.equipped === 'RIFLE') {
+                } else if (e.pointerType === 'mouse' && e.button === 2 && !isKnifeType()) {
                     mouseADS = true;
                     state.isADS = true;
                     document.getElementById('ads-indicator').textContent = 'Holografik Nişan (ADS)';
@@ -3322,6 +3742,9 @@
                 if (k === '1') equipWeapon('RIFLE');
                 if (k === '2') equipWeapon('BAYONET');
                 if (k === '3') equipWeapon('KARAMBIT');
+                if (k === '4') equipWeapon('AK47');
+                if (k === '5') equipWeapon('BUTTERFLY');
+                if (k === '6') equipWeapon('TALON');
                 if (k === 'f') triggerInspectWeapon();
                 if (k === 'l') toggleLaserSight();
                 if (k === 'c') toggleCrouch();
@@ -3353,7 +3776,7 @@
                 mouseADS = false;
                 state.isADS = false;
                 document.getElementById('btn-touch-ads').classList.remove('pressed');
-                if (state.equipped === 'RIFLE') document.getElementById('ads-indicator').textContent = 'C-Clamp Çift El IK';
+                if (!isKnifeType()) document.getElementById('ads-indicator').textContent = 'C-Clamp Çift El IK';
             });
 
             window.addEventListener('resize', () => {
@@ -3366,7 +3789,7 @@
             requestAnimationFrame(animate);
             const dt = Math.min(clock.getDelta(), 0.05);
 
-            if (state.isFiringHeld && state.equipped === 'RIFLE') {
+            if (state.isFiringHeld && !isKnifeType()) {
                 fireWeapon(false);
             }
 
@@ -3384,7 +3807,7 @@
                     const ammoToLoad = Math.min(35 - state.ammo, state.reserveAmmo);
                     state.ammo += ammoToLoad;
                     state.reserveAmmo -= ammoToLoad;
-                    const rifleData = skeletonRig.rifle.userData;
+                    const rifleData = getActiveFirearmModel().userData;
                     const magazineGroups = rifleData.magazineGroups;
                     if (magazineGroups && magazineGroups.length === 2) {
                         const nextIndex = 1 - rifleData.loadedMagazineIndex;
@@ -3399,7 +3822,7 @@
                 }
             }
 
-            const targetADS = (state.isADS && !state.isReloading && state.equipped === 'RIFLE') ? 1.0 : 0.0;
+            const targetADS = (state.isADS && !state.isReloading && !isKnifeType()) ? 1.0 : 0.0;
             if (Math.abs(state.adsLerp - targetADS) > 0.001) {
                 state.adsLerp = THREE.MathUtils.lerp(state.adsLerp, targetADS, dt * 14);
                 updateAdaptiveProjection();
@@ -3471,10 +3894,15 @@
             state.recoilPitch = THREE.MathUtils.lerp(state.recoilPitch, 0.0, dt * 10);
             state.recoilYaw = THREE.MathUtils.lerp(state.recoilYaw, 0.0, dt * 10);
 
-            if (muzzleFlashMesh && muzzleFlashMesh.material.opacity > 0) {
-                muzzleFlashMesh.material.opacity = Math.max(0, muzzleFlashMesh.material.opacity - dt * 18);
-                muzzleLight.intensity = Math.max(0, muzzleLight.intensity - dt * 65);
-            }
+            [skeletonRig.rifle, skeletonRig.ak47].forEach(firearm => {
+                if (!firearm) return;
+                const flash = firearm.userData.muzzleFlash;
+                const light = firearm.userData.muzzleLight;
+                if (flash && flash.material.opacity > 0) {
+                    flash.material.opacity = Math.max(0, flash.material.opacity - dt * 18);
+                    light.intensity = Math.max(0, light.intensity - dt * 65);
+                }
+            });
 
             for (let i = activeShells.length - 1; i >= 0; i--) {
                 const s = activeShells[i];
