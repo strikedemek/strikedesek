@@ -1043,6 +1043,7 @@
                 faces.push(c);
             }
             const cubeTex = new THREE.CubeTexture(faces);
+            cubeTex.encoding = THREE.sRGBEncoding;
             cubeTex.needsUpdate = true;
             return cubeTex;
         }
@@ -1378,6 +1379,7 @@
             }
 
             const tex = new THREE.CanvasTexture(c);
+            tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
             return tex;
@@ -1516,6 +1518,7 @@
             }
 
             const tex = new THREE.CanvasTexture(dCanvas);
+            tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
             return tex;
@@ -1640,14 +1643,119 @@
             }
 
             const tex = new THREE.CanvasTexture(c);
+            tex.encoding = THREE.sRGBEncoding;
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
             tex.repeat.set(2, 2);
             return { tex, knuckleHex: pal.knuckle, stripeHex: pal.stripe };
         }
 
+        function createSurfaceDetailTextures() {
+            const createTile = (size, draw, repeatX = 2, repeatY = 2) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                draw(canvas.getContext('2d'), size);
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(repeatX, repeatY);
+                return texture;
+            };
+
+            const brushedSteelBump = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, size, size);
+                for (let y = 0; y < size; y += 3) {
+                    const shade = 116 + Math.round((Math.sin(y * 0.41) + Math.cos(y * 0.13)) * 5);
+                    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+                    ctx.fillRect(0, y, size, 1);
+                }
+                for (let i = 0; i < 42; i++) {
+                    const x = (i * 67) % size, y = (i * 103) % size;
+                    ctx.strokeStyle = i % 3 ? 'rgba(255,255,255,0.24)' : 'rgba(20,24,28,0.28)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo((x + 22 + i % 29) % size, y + 0.5); ctx.stroke();
+                }
+            }, 3, 1);
+
+            const polymerBump = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, size, size);
+                for (let y = 4; y < size; y += 8) for (let x = 4; x < size; x += 8) {
+                    const shade = 108 + ((x * 13 + y * 7) % 36);
+                    ctx.fillStyle = `rgb(${shade},${shade},${shade})`;
+                    ctx.beginPath(); ctx.arc(x, y, 1.5 + ((x + y) % 3) * 0.25, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.strokeStyle = 'rgba(220,220,220,0.18)'; ctx.lineWidth = 1;
+                for (let y = 0; y < size; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(size, y); ctx.stroke(); }
+            }, 2, 3);
+
+            const rubberBump = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, size, size);
+                ctx.strokeStyle = 'rgba(35,38,42,0.55)'; ctx.lineWidth = 3;
+                for (let i = -size; i < size * 2; i += 12) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + size, size); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(i + size, 0); ctx.lineTo(i, size); ctx.stroke();
+                }
+                ctx.strokeStyle = 'rgba(225,225,225,0.28)'; ctx.lineWidth = 1;
+                for (let i = 0; i < size; i += 12) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, size); ctx.stroke(); }
+            }, 2, 2);
+
+            const woodAlbedo = createTile(512, (ctx, size) => {
+                const base = ctx.createLinearGradient(0, 0, size, size);
+                base.addColorStop(0, '#3c2415'); base.addColorStop(0.35, '#9a5c2f'); base.addColorStop(0.68, '#70401f'); base.addColorStop(1, '#321d13');
+                ctx.fillStyle = base; ctx.fillRect(0, 0, size, size);
+                for (let i = 0; i < 110; i++) {
+                    const y = (i * 47) % size;
+                    const bend = Math.sin(i * 1.7) * 20;
+                    ctx.strokeStyle = i % 3 ? 'rgba(32,17,10,0.30)' : 'rgba(226,165,98,0.24)';
+                    ctx.lineWidth = 1 + i % 3;
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.bezierCurveTo(140, y + bend, 340, y - bend, size, y + bend * 0.4); ctx.stroke();
+                }
+                for (let i = 0; i < 5; i++) {
+                    const x = 50 + i * 97, y = (i * 113 + 70) % size;
+                    ctx.strokeStyle = 'rgba(35,19,10,0.35)'; ctx.lineWidth = 2;
+                    for (let ring = 0; ring < 5; ring++) { ctx.beginPath(); ctx.ellipse(x, y, 5 + ring * 4, 2 + ring * 2, 0.18, 0, Math.PI * 2); ctx.stroke(); }
+                }
+            }, 1, 2);
+
+            const woodBump = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, size, size);
+                for (let i = 0; i < 90; i++) {
+                    const y = (i * 31) % size;
+                    const shade = i % 2 ? 110 : 148;
+                    ctx.strokeStyle = `rgba(${shade},${shade},${shade},0.5)`; ctx.lineWidth = 1 + i % 2;
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.bezierCurveTo(80, y + Math.sin(i) * 9, 170, y - Math.sin(i) * 9, size, y); ctx.stroke();
+                }
+            }, 1, 2);
+
+            const steelRoughness = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#c8c8c8'; ctx.fillRect(0, 0, size, size);
+                for (let y = 0; y < size; y += 8) {
+                    const value = 174 + Math.round((Math.sin(y * 0.19) + Math.cos(y * 0.07)) * 13);
+                    ctx.fillStyle = `rgb(${value},${value},${value})`; ctx.fillRect(0, y, size, 3);
+                }
+            }, 3, 1);
+
+            const polymerRoughness = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#d8d8d8'; ctx.fillRect(0, 0, size, size);
+                for (let y = 4; y < size; y += 16) for (let x = 4; x < size; x += 16) {
+                    const value = 178 + ((x * 5 + y * 11) % 36);
+                    ctx.fillStyle = `rgb(${value},${value},${value})`; ctx.fillRect(x, y, 4, 4);
+                }
+            }, 2, 3);
+
+            const woodRoughness = createTile(256, (ctx, size) => {
+                ctx.fillStyle = '#dfdfdf'; ctx.fillRect(0, 0, size, size);
+                ctx.strokeStyle = 'rgba(65,65,65,0.30)'; ctx.lineWidth = 3;
+                for (let y = 0; y < size; y += 16) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(size, y + Math.sin(y * 0.1) * 5); ctx.stroke(); }
+            }, 1, 2);
+
+            return { brushedSteelBump, polymerBump, rubberBump, woodAlbedo, woodBump, steelRoughness, polymerRoughness, woodRoughness };
+        }
+
         function createAnatomicalAndWeaponTextures() {
             metallicEnvCubeMap = createCS2MetallicEnvMap();
+            const surfaceDetails = createSurfaceDetailTextures();
 
             const skinCanvas = document.createElement('canvas');
             skinCanvas.width = 512; skinCanvas.height = 512;
@@ -1666,6 +1774,7 @@
                 sCtx.fill();
             }
             const skinAlbedoTex = new THREE.CanvasTexture(skinCanvas);
+            skinAlbedoTex.encoding = THREE.sRGBEncoding;
 
             const mCanvas = document.createElement('canvas');
             mCanvas.width = 512; mCanvas.height = 512;
@@ -1698,12 +1807,13 @@
                 muscleBumpTex,
                 gloveTex: gloveSkinTextures.VICE.tex,
                 gunAnimeTex: weaponSkinTextures.FADE.gun,
-                damascusTex: weaponSkinTextures.FADE.blade
+                damascusTex: weaponSkinTextures.FADE.blade,
+                surfaceDetails
             };
         }
 
         function initMaterials(textures) {
-            const { skinAlbedoTex, muscleBumpTex, gloveTex, gunAnimeTex, damascusTex } = textures;
+            const { skinAlbedoTex, muscleBumpTex, gloveTex, gunAnimeTex, damascusTex, surfaceDetails } = textures;
 
             sharedMaterials.skin = new THREE.MeshStandardMaterial({
                 map: skinAlbedoTex,
@@ -1764,25 +1874,42 @@
             sharedMaterials.shorts = new THREE.MeshStandardMaterial({
                 color: 0x1e293b,
                 roughness: 0.72,
-                bumpMap: gloveTex,
-                bumpScale: 0.004
+                bumpMap: surfaceDetails.polymerBump,
+                bumpScale: 0.003
             });
+
+            sharedMaterials.woodStock = new THREE.MeshStandardMaterial({
+                map: surfaceDetails.woodAlbedo,
+                bumpMap: surfaceDetails.woodBump,
+                bumpScale: 0.018,
+                roughnessMap: surfaceDetails.woodRoughness,
+                roughness: 0.58,
+                metalness: 0.02
+            });
+            sharedMaterials.woodDark = sharedMaterials.woodStock.clone();
+            sharedMaterials.woodDark.color.set(0x9a7458);
+            sharedMaterials.stockGreen = sharedMaterials.woodStock.clone();
+            sharedMaterials.stockGreen.color.set(0x6b967f);
 
             // CS2 Yüksek Metalik Silah & Bıçak Materyalleri (EnvMap Destekli)
             sharedMaterials.gunMetal = new THREE.MeshStandardMaterial({
                 color: 0x1e2430,
-                roughness: 0.20,
-                metalness: 0.94,
-                bumpMap: gloveTex,
-                bumpScale: 0.002,
+                roughness: 0.26,
+                metalness: 0.88,
+                bumpMap: surfaceDetails.brushedSteelBump,
+                bumpScale: 0.0018,
+                roughnessMap: surfaceDetails.steelRoughness,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.35
             });
             sharedMaterials.gunFDE = new THREE.MeshStandardMaterial({
                 map: gunAnimeTex,
                 color: 0xffffff,
-                roughness: 0.14,
-                metalness: 0.86,
+                roughness: 0.24,
+                metalness: 0.76,
+                bumpMap: surfaceDetails.brushedSteelBump,
+                bumpScale: 0.00075,
+                roughnessMap: surfaceDetails.steelRoughness,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.45
             });
@@ -1806,17 +1933,21 @@
             });
             sharedMaterials.gunBarrelSteel = new THREE.MeshStandardMaterial({
                 color: 0x94a3b8,
-                roughness: 0.12,
-                metalness: 0.98,
+                roughness: 0.22,
+                metalness: 0.94,
+                bumpMap: surfaceDetails.brushedSteelBump,
+                bumpScale: 0.0014,
+                roughnessMap: surfaceDetails.steelRoughness,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.65
             });
             sharedMaterials.gunPolymer = new THREE.MeshStandardMaterial({
                 color: 0x11141d,
-                roughness: 0.44,
-                metalness: 0.35,
-                bumpMap: gloveTex,
-                bumpScale: 0.006,
+                roughness: 0.54,
+                metalness: 0.12,
+                bumpMap: surfaceDetails.polymerBump,
+                bumpScale: 0.004,
+                roughnessMap: surfaceDetails.polymerRoughness,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 0.5
             });
@@ -1830,10 +1961,11 @@
             sharedMaterials.bayonetBlade = new THREE.MeshStandardMaterial({
                 map: damascusTex,
                 color: 0xffffff,
-                roughness: 0.07,
-                metalness: 0.98,
-                bumpMap: damascusTex,
-                bumpScale: 0.002,
+                roughness: 0.18,
+                metalness: 0.96,
+                bumpMap: surfaceDetails.brushedSteelBump,
+                bumpScale: 0.0012,
+                roughnessMap: surfaceDetails.steelRoughness,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.85
             });
@@ -1847,28 +1979,29 @@
             sharedMaterials.damascusBlade = new THREE.MeshStandardMaterial({
                 map: damascusTex,
                 color: 0xffffff,
-                roughness: 0.06,
-                metalness: 0.99,
-                bumpMap: damascusTex,
-                bumpScale: 0.0025,
+                roughness: 0.16,
+                metalness: 0.97,
+                bumpMap: surfaceDetails.brushedSteelBump,
+                bumpScale: 0.0015,
+                roughnessMap: surfaceDetails.steelRoughness,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 1.95
             });
             sharedMaterials.knifeGrip = new THREE.MeshStandardMaterial({
                 color: 0x171923,
-                roughness: 0.42,
-                metalness: 0.35,
-                bumpMap: gloveTex,
-                bumpScale: 0.009,
+                roughness: 0.62,
+                metalness: 0.08,
+                bumpMap: surfaceDetails.rubberBump,
+                bumpScale: 0.0035,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 0.6
             });
             sharedMaterials.karambitGrip = new THREE.MeshStandardMaterial({
                 color: 0x1e1b2e,
-                roughness: 0.30,
-                metalness: 0.55,
-                bumpMap: gloveTex,
-                bumpScale: 0.007,
+                roughness: 0.48,
+                metalness: 0.16,
+                bumpMap: surfaceDetails.rubberBump,
+                bumpScale: 0.003,
                 envMap: metallicEnvCubeMap,
                 envMapIntensity: 0.85
             });
@@ -2341,6 +2474,18 @@
             lowerRec.position.set(0, -0.008, 0.005);
             gunCore.add(lowerRec);
 
+            [-1, 1].forEach(side => {
+                [-0.075, -0.015, 0.055, 0.112].forEach(z => {
+                    const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.0042, 0.0042, 0.003, 10), sharedMaterials.bayonetEdge);
+                    pin.rotation.z = Math.PI / 2;
+                    pin.position.set(side * 0.0235, 0.031, z);
+                    gunCore.add(pin);
+                    const slot = new THREE.Mesh(new THREE.BoxGeometry(0.001, 0.0048, 0.001), sharedMaterials.gunPolymer);
+                    slot.position.set(side * 0.0252, 0.031, z);
+                    gunCore.add(slot);
+                });
+            });
+
             // Krom Mekanizma (Bolt Carrier) & Toz Kapağı (Dust Cover)
             const ejectionPort = new THREE.Mesh(new THREE.BoxGeometry(0.007, 0.017, 0.072), sharedMaterials.bayonetEdge);
             ejectionPort.position.set(-0.021, 0.036, 0.025);
@@ -2494,6 +2639,11 @@
                 const sideRail = new THREE.Mesh(new THREE.BoxGeometry(0.0045, 0.0065, 0.255), sharedMaterials.gunCyberCyan);
                 sideRail.position.set(side * 0.0265, 0.032, 0.235);
                 gunCore.add(sideRail);
+                for (let z = 0.13; z <= 0.34; z += 0.035) {
+                    const mlokSlot = new THREE.Mesh(new THREE.BoxGeometry(0.0018, 0.006, 0.012), sharedMaterials.gunPolymer);
+                    mlokSlot.position.set(side * 0.0275, 0.031, z);
+                    gunCore.add(mlokSlot);
+                }
             });
 
             const afgGrip = new THREE.Mesh(new THREE.BoxGeometry(0.026, 0.024, 0.085), sharedMaterials.gunPolymer);
@@ -2582,8 +2732,8 @@
             core.rotation.y = Math.PI;
             gun.add(core);
 
-            const wood = new THREE.MeshStandardMaterial({ color: 0x8b451f, roughness: 0.62, metalness: 0.02 });
-            const darkWood = new THREE.MeshStandardMaterial({ color: 0x5b301d, roughness: 0.68, metalness: 0.02 });
+            const wood = sharedMaterials.woodStock;
+            const darkWood = sharedMaterials.woodDark;
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.060, 0.275), sharedMaterials.gunFDE);
             receiver.position.set(0, 0.030, 0.015);
             core.add(receiver);
@@ -2591,6 +2741,16 @@
             dustCover.rotation.x = Math.PI / 2;
             dustCover.position.set(0, 0.064, 0.02);
             core.add(dustCover);
+            const selector = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.009, 0.082), sharedMaterials.gunMetal);
+            selector.position.set(-0.030, 0.002, -0.018);
+            selector.rotation.x = -0.32;
+            core.add(selector);
+            [-0.095, -0.035, 0.025, 0.085].forEach(z => {
+                const rivet = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.003, 10), sharedMaterials.bayonetEdge);
+                rivet.rotation.z = Math.PI / 2;
+                rivet.position.set(-0.028, 0.03, z);
+                core.add(rivet);
+            });
 
             const stock = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.090, 0.205), wood);
             stock.position.set(0, 0.002, -0.205);
@@ -2643,6 +2803,11 @@
                 const shell = new THREE.Mesh(body, sharedMaterials.gunFDE);
                 shell.position.y = -0.09;
                 magazine.add(shell);
+                for (let ridge = 0; ridge < 5; ridge++) {
+                    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.006, 0.044), sharedMaterials.gunMetal);
+                    rib.position.set(0.024, -0.035 - ridge * 0.027, 0);
+                    magazine.add(rib);
+                }
                 const floorPlate = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.012, 0.060), sharedMaterials.gunMetal);
                 floorPlate.position.set(0.018, -0.187, 0);
                 magazine.add(floorPlate);
@@ -2807,7 +2972,7 @@
             const core = new THREE.Group();
             core.rotation.y = Math.PI;
             gun.add(core);
-            const stockMaterial = new THREE.MeshStandardMaterial({ color: 0x25634f, roughness: 0.48, metalness: 0.06 });
+            const stockMaterial = sharedMaterials.stockGreen;
 
             const receiver = new THREE.Mesh(new THREE.BoxGeometry(0.064, 0.074, 0.38), sharedMaterials.gunFDE);
             receiver.position.set(0, 0.034, 0.07);
@@ -2864,6 +3029,21 @@
             objective.rotation.x = Math.PI / 2;
             objective.position.set(0, 0.124, 0.18);
             core.add(objective);
+            const elevationTurret = new THREE.Mesh(new THREE.CylinderGeometry(0.031, 0.031, 0.050, 16), sharedMaterials.gunMetal);
+            elevationTurret.position.set(0, 0.083, 0.035);
+            core.add(elevationTurret);
+            const turretCap = new THREE.Mesh(new THREE.CylinderGeometry(0.020, 0.020, 0.008, 16), sharedMaterials.gunAccentNeon);
+            turretCap.position.set(0, 0.113, 0.035);
+            core.add(turretCap);
+            const windageTurret = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 0.050, 16), sharedMaterials.gunMetal);
+            windageTurret.rotation.z = Math.PI / 2;
+            windageTurret.position.set(0.037, 0.124, 0.035);
+            core.add(windageTurret);
+            [-0.08, -0.045, -0.01, 0.025, 0.06].forEach(z => {
+                const scopeRib = new THREE.Mesh(new THREE.BoxGeometry(0.004, 0.032, 0.008), sharedMaterials.gunPolymer);
+                scopeRib.position.set(0, 0.124, z);
+                core.add(scopeRib);
+            });
 
             const triggerGuard = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.004, 8, 18, Math.PI), sharedMaterials.gunMetal);
             triggerGuard.rotation.y = Math.PI / 2;
@@ -2920,6 +3100,11 @@
             const slide = new THREE.Mesh(new THREE.BoxGeometry(0.052, 0.048, 0.23), sharedMaterials.gunFDE);
             slide.position.set(0, 0.038, 0.02);
             core.add(slide);
+            [-0.055, -0.038, -0.021, -0.004, 0.013].forEach(z => {
+                const serration = new THREE.Mesh(new THREE.BoxGeometry(0.002, 0.031, 0.004), sharedMaterials.gunMetal);
+                serration.position.set(-0.027, 0.038, z);
+                core.add(serration);
+            });
             gun.userData.fireCyclePart = slide;
             gun.userData.fireCycleAxis = 'z';
             gun.userData.fireCycleRest = slide.position.z;
@@ -3986,6 +4171,7 @@
                 gCtx.beginPath(); gCtx.moveTo(0, i); gCtx.lineTo(512, i); gCtx.stroke();
             }
             const floorTex = new THREE.CanvasTexture(gridCanvas);
+            floorTex.encoding = THREE.sRGBEncoding;
             floorTex.wrapS = THREE.RepeatWrapping;
             floorTex.wrapT = THREE.RepeatWrapping;
             floorTex.repeat.set(70, 70);
@@ -4812,24 +4998,38 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.outputEncoding = THREE.sRGBEncoding;
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.15;
             container.appendChild(renderer.domElement);
 
-            scene.add(new THREE.HemisphereLight(0xe0f2fe, 0x1e293b, 0.90));
+            scene.add(new THREE.HemisphereLight(0xe8eee0, 0x171e19, 0.72));
 
-            const keyLight = new THREE.DirectionalLight(0xfffbeb, 1.32);
+            const keyLight = new THREE.DirectionalLight(0xfff4df, 1.55);
             keyLight.position.set(6, 14, 9);
             keyLight.castShadow = true;
             keyLight.shadow.mapSize.width = 2048;
             keyLight.shadow.mapSize.height = 2048;
+            keyLight.shadow.camera.left = -10;
+            keyLight.shadow.camera.right = 10;
+            keyLight.shadow.camera.top = 10;
+            keyLight.shadow.camera.bottom = -10;
+            keyLight.shadow.bias = -0.00025;
             scene.add(keyLight);
 
-            const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.55);
+            const rimLight = new THREE.DirectionalLight(0x9dc9bd, 0.72);
             rimLight.position.set(-7, 6, -8);
             scene.add(rimLight);
+
+            const fillLight = new THREE.DirectionalLight(0xc6d3b8, 0.34);
+            fillLight.position.set(-5, 4, 7);
+            scene.add(fillLight);
+
+            const warmBounce = new THREE.PointLight(0xffc88c, 0.42, 18);
+            warmBounce.position.set(2.5, 2.8, 1.5);
+            scene.add(warmBounce);
 
             const textures = createAnatomicalAndWeaponTextures();
             initMaterials(textures);
