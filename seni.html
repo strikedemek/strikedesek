@@ -2,11 +2,11 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>True-Body FPS & TPS Anatomi + CS2 Metalik Karambit/Bıçak & Eldiven Simülatörü</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -21,7 +21,7 @@
             height: 100%;
             overflow: hidden;
             background-color: #070b14;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             color: #f1f5f9;
             touch-action: none;
         }
@@ -38,11 +38,11 @@
             height: 100%;
         }
         .glass-panel {
-            background: rgba(10, 16, 29, 0.88);
+            background: rgba(12, 17, 20, 0.88);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            box-shadow: 0 12px 32px -5px rgba(0, 0, 0, 0.75);
+            border: 1px solid rgba(225, 234, 216, 0.16);
+            box-shadow: 0 12px 32px -5px rgba(0, 0, 0, 0.72);
         }
         .hud-btn {
             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -51,10 +51,10 @@
             transform: scale(0.94);
         }
         .hud-btn.active {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            border-color: #60a5fa;
-            color: #ffffff;
-            box-shadow: 0 0 14px rgba(37, 99, 235, 0.55);
+            background: linear-gradient(135deg, #d5f46a, #9ec54c);
+            border-color: #efffb5;
+            color: #172017;
+            box-shadow: 0 0 18px rgba(190, 226, 100, 0.30);
         }
         .skin-btn {
             transition: all 0.15s ease;
@@ -62,13 +62,13 @@
             overflow: hidden;
         }
         .skin-btn.active {
-            border-color: #f43f5e !important;
-            box-shadow: 0 0 12px rgba(244, 63, 94, 0.65);
+            border-color: #f4c779 !important;
+            box-shadow: 0 0 12px rgba(244, 199, 121, 0.5);
             transform: translateY(-1px);
         }
         .glove-btn.active {
-            border-color: #38bdf8 !important;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.65);
+            border-color: #8ae5c6 !important;
+            box-shadow: 0 0 12px rgba(138, 229, 198, 0.45);
             transform: translateY(-1px);
         }
         .touch-action-btn {
@@ -127,7 +127,199 @@
         .mono {
             font-family: 'JetBrains Mono', monospace;
         }
-        @media (max-height: 500px) {
+        #weapon-title-hud, #ammo-current, #hud-hits { font-family: 'Barlow Condensed', sans-serif; }
+        #top-control-bar > div { border-color: rgba(218, 229, 201, 0.16); }
+        #touch-controls-layer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+        #anatomy-drawer, #gemini-radio-panel { overscroll-behavior: contain; }
+
+        @keyframes drawerRise {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            body, html { background: #080d0c; }
+            #top-control-bar {
+                top: calc(env(safe-area-inset-top, 0px) + 8px);
+                left: 10px;
+                right: 10px;
+                gap: 8px;
+            }
+            #cam-mode-group, #utility-group {
+                min-width: 0;
+                height: 46px;
+                padding: 4px;
+                gap: 3px;
+                border-radius: 16px;
+                background: rgba(11, 16, 16, 0.86);
+                border-color: rgba(222, 233, 211, 0.18);
+                box-shadow: 0 8px 28px rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.04);
+            }
+            #cam-mode-group { flex: 1; justify-content: space-around; }
+            #utility-group { flex: 0 0 auto; }
+            #top-control-bar .hud-btn {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                flex: 0 0 42px;
+                width: 42px;
+                height: 42px;
+                padding: 0;
+                border-radius: 12px;
+                font-size: 17px;
+                line-height: 1;
+            }
+            #top-control-bar .hud-btn span + span { display: none; }
+            #top-control-bar #btn-cam-fps,
+            #top-control-bar #btn-cam-tps,
+            #top-control-bar #btn-cam-inspect { border-color: transparent; }
+            #telemetry-pill {
+                top: calc(env(safe-area-inset-top, 0px) + 62px);
+                left: 10px;
+                right: auto;
+                max-width: calc(100vw - 112px);
+            }
+            #telemetry-pill > div {
+                min-height: 30px;
+                padding: 5px 9px;
+                gap: 5px;
+                border-color: rgba(213, 244, 106, 0.2);
+                background: rgba(10, 16, 14, 0.76);
+                font-size: 9px;
+            }
+            #active-mode-label { color: #d8f28b; }
+            #pitch-telemetry { font-size: 9px; }
+            #pip-overlay {
+                top: calc(env(safe-area-inset-top, 0px) + 62px);
+                right: 10px;
+                width: 82px;
+                height: 96px;
+                padding: 5px;
+                border-width: 1px;
+                border-color: rgba(138, 229, 198, 0.42);
+                border-radius: 14px;
+                background: rgba(7, 15, 13, 0.38);
+                box-shadow: 0 8px 22px rgba(0, 0, 0, 0.34);
+            }
+            #pip-overlay > div { font-size: 7px; }
+            #bottom-hud-bar {
+                top: calc(env(safe-area-inset-top, 0px) + 101px);
+                bottom: auto;
+                left: 10px;
+                transform: none;
+                width: max-content;
+                max-width: calc(100vw - 112px);
+                min-height: 46px;
+                padding: 5px 10px;
+                gap: 10px;
+                border-radius: 15px;
+                border-color: rgba(244, 199, 121, 0.22);
+                background: rgba(12, 16, 15, 0.82);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            }
+            #bottom-hud-bar > div:nth-child(2), #bottom-hud-bar > div:nth-child(4) { min-width: 42px; }
+            #ammo-current { font-size: 22px; line-height: 0.9; }
+            #hud-hits { font-size: 20px; }
+            #joystick-zone {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+                left: 13px;
+                width: 112px;
+                height: 112px;
+                border: 1px solid rgba(210, 225, 203, 0.28);
+                background: radial-gradient(circle at 35% 28%, rgba(137, 169, 104, 0.22), rgba(9, 17, 15, 0.76) 70%);
+                box-shadow: inset 0 1px rgba(255, 255, 255, 0.08), 0 12px 30px rgba(0, 0, 0, 0.38);
+            }
+            #joystick-knob {
+                background: linear-gradient(145deg, #d4f36f, #8ba946);
+                color: #1b2713;
+                border-color: rgba(248, 255, 222, 0.86);
+                box-shadow: 0 0 22px rgba(196, 235, 111, 0.32);
+            }
+            #right-touch-cluster {
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+                right: 12px;
+                transform: scale(0.94);
+                transform-origin: bottom right;
+            }
+            .touch-action-btn {
+                border: 1px solid rgba(225, 234, 216, 0.34);
+                background: rgba(17, 25, 22, 0.88);
+                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), inset 0 1px rgba(255, 255, 255, 0.05);
+            }
+            .touch-action-btn:active, .touch-action-btn.pressed {
+                background: rgba(166, 201, 81, 0.94);
+                border-color: #e5ffa1;
+                color: #14200f;
+            }
+            .fire-btn {
+                background: radial-gradient(circle at 34% 28%, #ff9273, #e45a3c 62%, #8d2c20);
+                border: 1px solid rgba(255, 220, 197, 0.78);
+                box-shadow: 0 0 24px rgba(229, 92, 61, 0.36), inset 0 1px rgba(255, 255, 255, 0.30);
+            }
+            #anatomy-drawer {
+                top: auto;
+                left: 7px;
+                right: 7px;
+                bottom: 0;
+                width: auto;
+                max-height: min(88dvh, calc(100dvh - env(safe-area-inset-top, 0px) - 12px));
+                padding: 18px 14px calc(18px + env(safe-area-inset-bottom, 0px));
+                gap: 12px;
+                border: 1px solid rgba(224, 235, 212, 0.18);
+                border-bottom: 0;
+                border-radius: 24px 24px 0 0;
+                background: linear-gradient(155deg, rgba(24, 31, 27, 0.97), rgba(8, 14, 13, 0.98) 55%);
+                box-shadow: 0 -22px 70px rgba(0, 0, 0, 0.64);
+                animation: drawerRise 0.24s ease-out;
+            }
+            #anatomy-drawer::before {
+                content: "";
+                position: absolute;
+                top: 7px;
+                left: 50%;
+                width: 38px;
+                height: 4px;
+                border-radius: 9px;
+                background: rgba(222, 233, 211, 0.34);
+                transform: translateX(-50%);
+            }
+            #anatomy-drawer > div:first-child { padding-top: 5px; }
+            #anatomy-drawer .grid { gap: 7px; }
+            #anatomy-drawer .skin-btn,
+            #anatomy-drawer .glove-btn,
+            #anatomy-drawer .hud-btn { min-height: 38px; border-radius: 11px; }
+            #anatomy-drawer { line-height: 1.35; }
+            #gemini-radio-panel {
+                top: calc(env(safe-area-inset-top, 0px) + 62px);
+                left: 10px;
+                right: 10px;
+                width: auto;
+                max-height: 72dvh;
+                padding: 14px;
+                border-radius: 20px;
+                background: rgba(11, 18, 15, 0.96);
+            }
+            #gemini-chat-log { height: min(34dvh, 230px); }
+        }
+
+        @media (max-width: 380px) {
+            #top-control-bar { left: 7px; right: 7px; gap: 5px; }
+            #cam-mode-group, #utility-group { gap: 1px; }
+            #top-control-bar .hud-btn { flex-basis: 40px; width: 40px; height: 40px; }
+            #pip-overlay { width: 72px; height: 86px; }
+            #telemetry-pill { max-width: calc(100vw - 93px); }
+            #bottom-hud-bar { max-width: calc(100vw - 93px); }
+        }
+
+        @media (max-height: 500px) and (max-width: 900px) {
+            #bottom-hud-bar { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 5px); }
+            #anatomy-drawer { max-height: 92dvh; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        @media (max-height: 500px) and (min-width: 901px) {
             #pip-overlay {
                 top: 46px !important;
                 left: 8px !important;
@@ -190,27 +382,27 @@
     </div>
 
     <!-- Üst Kamera ve Cephanelik Kontrol Barı -->
-    <div class="fixed top-2 left-2 right-2 z-30 flex items-center justify-between gap-1 pointer-events-none">
-        <div class="glass-panel rounded-xl p-1 flex items-center gap-1 pointer-events-auto shadow-xl">
-            <button id="btn-cam-fps" onclick="setCameraMode('FPS')" class="hud-btn active px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-transparent flex items-center gap-1">
+    <div id="top-control-bar" class="fixed top-2 left-2 right-2 z-30 flex items-center justify-between gap-1 pointer-events-none">
+        <div id="cam-mode-group" class="glass-panel rounded-xl p-1 flex items-center gap-1 pointer-events-auto shadow-xl">
+            <button id="btn-cam-fps" title="Birinci şahıs kamera" aria-label="Birinci şahıs kamera" onclick="setCameraMode('FPS')" class="hud-btn active px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-transparent flex items-center gap-1">
                 <span>👁️</span> <span>1. Şahıs</span>
             </button>
-            <button id="btn-cam-tps" onclick="setCameraMode('TPS')" class="hud-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-slate-700/70 text-slate-200 flex items-center gap-1">
+            <button id="btn-cam-tps" title="Üçüncü şahıs kamera" aria-label="Üçüncü şahıs kamera" onclick="setCameraMode('TPS')" class="hud-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-slate-700/70 text-slate-200 flex items-center gap-1">
                 <span>🎯</span> <span>3. Şahıs</span>
             </button>
-            <button id="btn-cam-inspect" onclick="setCameraMode('INSPECT')" class="hud-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-slate-700/70 text-slate-200 flex items-center gap-1">
+            <button id="btn-cam-inspect" title="360 derece inceleme" aria-label="360 derece inceleme" onclick="setCameraMode('INSPECT')" class="hud-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold border border-slate-700/70 text-slate-200 flex items-center gap-1">
                 <span>🔬</span> <span>360°</span>
             </button>
         </div>
 
-        <div class="glass-panel rounded-xl p-1 flex items-center gap-1 pointer-events-auto shadow-xl">
-            <button id="btn-pip-mirror" onclick="togglePiPMirror()" class="hud-btn active px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-transparent flex items-center gap-1">
+        <div id="utility-group" class="glass-panel rounded-xl p-1 flex items-center gap-1 pointer-events-auto shadow-xl">
+            <button id="btn-pip-mirror" title="Ayna önizlemesi" aria-label="Ayna önizlemesini aç veya kapat" onclick="togglePiPMirror()" class="hud-btn active px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-transparent flex items-center gap-1">
                 <span>🪞</span> <span class="hidden sm:inline">Ayna</span>
             </button>
-            <button onclick="toggleGeminiRadio()" class="hud-btn px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-emerald-500/50 text-emerald-300 flex items-center gap-1 bg-emerald-950/40">
+            <button id="btn-ai-toggle" title="AI telsizi" aria-label="AI telsizini aç veya kapat" onclick="toggleGeminiRadio()" class="hud-btn px-2 sm:px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-emerald-500/50 text-emerald-300 flex items-center gap-1 bg-emerald-950/40">
                 <span>🤖</span> <span>AI</span>
             </button>
-            <button onclick="toggleAnatomyDrawer()" class="hud-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-amber-400/60 text-amber-300 flex items-center gap-1 bg-amber-950/40">
+            <button id="btn-armory-toggle" title="Cephanelik ve eldivenler" aria-label="Cephaneliği aç veya kapat" onclick="toggleAnatomyDrawer()" class="hud-btn px-2.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold border border-amber-400/60 text-amber-300 flex items-center gap-1 bg-amber-950/40">
                 <span>🧤</span> <span>CS2 Skin & Eldiven</span>
             </button>
         </div>
